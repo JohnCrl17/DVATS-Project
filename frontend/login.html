@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTO Admin Login | DVATS</title>
+    <link rel="icon" type="image/png" href="assets/image/logo-5.png">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body class="login-page">
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="text-center mb-4">
+            <img src="assets/image/logo-5.png" alt="LTO Logo" class="lto-logo mb-3">
+            <h4 class="fw-bold text-white mb-0">DVATS</h4>
+            <p class="text-white-50 small text-uppercase tracking-wider">Official Admin Portal</p>
+        </div>
+
+        <div class="form-body text-start">
+            <div class="mb-3">
+                <label class="form-label">Email Address</label>
+                <div class="input-group">
+                    <i class="bi bi-envelope"></i>
+                    <input type="email" id="email" class="form-control" placeholder="Email Address">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Password</label>
+                <div class="glass-input-wrapper">
+                    <i class="bi bi-lock input-icon-left"></i>
+                    <input type="password" id="password" class="form-control-glass" placeholder="Password">
+                    <button class="toggle-password-btn" type="button" onclick="togglePasswordVisibility()">
+                        <i class="bi bi-eye" id="eyeIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn btn-primary w-100 py-3 fw-bold" onclick="login()">
+                SIGN IN
+            </button>
+        </div>
+
+        <div class="back-navigation">
+            <p class="small text-white-50 mb-3">Authorized personnel only</p>
+            <a href="index.html" class="btn-back">
+                <i class="bi bi-arrow-left"></i> <span>Back to Home</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script src="js/Iosalert.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>

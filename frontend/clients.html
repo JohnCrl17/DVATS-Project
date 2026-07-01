@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTO Clients | Admin System</title>
+    <link rel="icon" type="image/png" href="assets/image/logo-5.png">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lto: { green: '#107c10', dark: '#0a5a0a' }
+                    }
+                }
+            }
+        }
+    </script>
+
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        #sidebar {
+            background-color: #00A36C; 
+            color: #1e293b; 
+            z-index: 50;
+        }
+
+        /* Standard Collapse Width */
+        .collapsed { width: 85px !important; }
+        .main-expanded { margin-left: 85px !important; }
+
+        /* Nav Item Base - Full Sidebar */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            padding: 0.8rem 1.5rem !important;
+            border-radius: 12px !important;
+            transition: all 0.2s ease;
+            margin: 0.5rem 1rem;
+            color: #334155; 
+            font-weight: 600;
+            text-decoration: none !important;
+        }
+
+        .active-nav {
+            background-color: white !important;
+            color: #00A36C !important;
+            font-weight: 800;
+        }
+
+        /* --- THE FIX: PARA LUMAPAT SA CONTENT (SCREENSHOT 567) --- */
+
+        /* Alisin ang padding ng nav container sa collapsed mode para madikit ang box */
+        .collapsed nav { padding-left: 0 !important; padding-right: 0 !important; }
+        .collapsed #navContainer { space-y-2; }
+
+        .collapsed .nav-item {
+            /* Dito natin ididikit sa kanang dulo */
+            margin: 8px 0 8px 15px !important; 
+            width: 70px !important; /* Fixed width */
+            height: 55px !important;
+            padding: 0 !important;
+            justify-content: center !important;
+            border-radius: 20px 0 0 20px !important; /* Round sa kaliwa, flat sa kanan */
+            transform: none !important;
+        }
+
+        /* Active State para sa Collapsed - Ito yung puting "Tab" */
+        .collapsed .active-nav {
+            background-color: white !important;
+            color: #00A36C !important;
+            /* Force sagad sa kanan */
+            width: 70px !important; 
+            margin-left: 15px !important; 
+            box-shadow: none !important;
+        }
+
+        .collapsed .nav-item i { font-size: 1.5rem !important; margin: 0 !important; }
+
+        /* Hide text & brand elements */
+        .collapsed .link-text, .collapsed .brand-name, .collapsed .admin-only p {
+            display: none !important;
+        }
+
+        /* UI Polishing */
+        .hover-lift { transition: all 0.3s ease; cursor: pointer; }
+        .hover-lift:hover { transform: translateY(-8px); box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1); }
+
+        /* Siguraduhin na ang footer ay laging nasa ilalim */
+        .sidebar-footer {
+            margin-top: auto; 
+        }
+
+        /* Logout Specific Hover */
+        .logout-link:hover {
+            background-color: #fee2e2 !important; /* light red */
+            color: #dc2626 !important; /* dark red */
+        }
+
+        /* --- THE FIX PARA SA COLLAPSED DESIGN --- */
+        .collapsed .sidebar-footer {
+            padding: 10px 0 !important;
+            display: flex;
+            justify-content: center;
+        }
+
+        .collapsed .logout-link {
+            /* Kaparehas ng style ng nav-items mo sa clients */
+            margin: 8px 0 8px 15px !important; 
+            width: 70px !important; 
+            height: 55px !important;
+            padding: 0 !important;
+            justify-content: center !important;
+            border-radius: 20px 0 0 20px !important; 
+            background-color: transparent;
+        }
+
+        /* Para maging center ang icon sa loob */
+        .collapsed .logout-link i {
+            font-size: 1.5rem !important;
+            margin: 0 !important;
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-slate-900 overflow-x-hidden">
+
+<div class="flex min-h-screen">
+    <aside id="sidebar" class="sidebar-transition fixed inset-y-0 left-0 z-50 w-64 shadow-2xl overflow-hidden">
+        <div class="flex flex-col h-full">
+            <div class="p-6 border-b border-black/5 flex items-center justify-between">
+                <button id="sidebarToggle" class="flex items-center gap-3 w-full hover:bg-black/5 p-2 rounded-xl transition-all outline-none">
+                    <i class="bi bi-list text-3xl text-slate-800"></i>
+                    <span class="brand-name font-black tracking-tighter text-xl uppercase italic whitespace-nowrap text-slate-900">Dasma Admin</span>
+                </button>
+            </div>
+
+            <nav class="flex-1 px-4 py-6 flex flex-col justify-start overflow-y-auto">
+                <div id="navContainer" class="space-y-2">
+                    <a href="dashboard.html" class="nav-item">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span class="link-text text-md">Dashboard</span>
+                    </a>
+                    <a href="clients.html" class="nav-item active-nav">
+                        <i class="bi bi-people-fill"></i>
+                        <span class="link-text text-md">Violators</span>
+                    </a>
+                    <a href="violations.html" class="nav-item">
+                        <i class="bi bi-exclamation-octagon-fill"></i>
+                        <span class="link-text text-md">Violations</span>
+                    </a>
+                    <a href="master_violations.html" class="nav-item">
+                        <i class="bi-car-front-fill"></i>
+                        <span class="link-text text-md">City ORD</span>
+                    </a>
+                    <a href="appointments.html" class="nav-item">
+                        <i class="bi bi-calendar-week-fill"></i>
+                        <span class="link-text text-md">Appointments</span>
+                    </a>
+                    <a href="enforcers.html" class="nav-item">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        <span class="link-text text-md">Enforcers</span>
+                    </a>
+
+                    <div class="admin-only pt-4 border-t border-black/10 mt-4">
+                        <p class="link-text px-4 text-xs font-bold text-slate-600 uppercase tracking-widest mb-2">System</p>
+                        <a href="settings.html" class="nav-item">
+                            <i class="bi bi-gear-fill"></i>
+                            <span class="link-text text-md">Settings</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="p-4 mt-auto border-t border-black/5 sidebar-footer">
+                <a href="#" id="logoutBtn" class="nav-item logout-link text-red-600 hover:bg-red-50">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span class="link-text uppercase text-xs font-bold">Logout</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <main id="mainContent" class="flex-1 ml-64 sidebar-transition min-h-screen">
+        <header class="bg-white px-8 h-20 flex items-center justify-between border-b border-slate-200 sticky top-0 z-40">
+            <div class="flex items-center gap-3">
+                <div class="h-8 w-1 bg-lto-green rounded-full"></div>
+                <h2 class="text-xl font-bold text-slate-800 tracking-tight">Client Records</h2>
+            </div>
+            <div class="bg-emerald-50 px-4 py-2 rounded-lg border border-emerald-100 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-lto-green animate-pulse"></span>
+                <span class="text-[10px] font-black text-lto-green uppercase tracking-widest">System Active</span>
+            </div>
+        </header>
+
+        <div class="p-8">
+            <div class="mb-6 flex justify-between items-center">
+                <div class="relative w-full max-w-md">
+                    <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="clientSearch" placeholder="Search by name or license..." 
+                        class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:border-lto-green outline-none shadow-sm transition-all">
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            <th class="px-6 py-4">ID</th>
+                            <th class="px-6 py-4">Full Name</th>
+                            <th class="px-6 py-4">License No.</th>
+                            <th class="px-6 py-4">Phone Number</th>
+                            <th class="px-6 py-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clientsTableBody" class="divide-y divide-slate-100 text-sm font-medium text-slate-600">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="viewModalOverlay" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
+        <div class="bg-lto-green px-6 py-4 flex justify-between items-center text-white">
+            <h3 class="font-bold flex items-center gap-2 uppercase tracking-tight">
+                <i class="bi bi-person-badge"></i> Client Intelligence Profile
+            </h3>
+            <button onclick="closeModal()" class="hover:text-white/70 transition-all text-xl">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        
+        <div class="p-8">
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="w-full md:w-1/3 text-center border-b md:border-b-0 md:border-r pb-6 md:pb-0 md:pr-8">
+                    <div class="relative inline-block mb-4">
+                        <img id="view-face" src="assets/image/default-user.jpg" class="w-32 h-32 rounded-2xl object-cover border-4 border-slate-50 shadow-md">
+                        <div class="absolute -bottom-2 -right-2 bg-emerald-500 text-white px-2 py-0.5 rounded-md text-[9px] font-bold border-2 border-white">
+                            <i class="bi bi-patch-check"></i> VERIFIED
+                        </div>
+                    </div>
+                    <h4 id="view-name" class="text-lg font-black text-slate-800 uppercase leading-tight">---</h4>
+                    <p id="view-id" class="text-xs text-lto-green font-bold mt-1 tracking-widest">#CL-0000</p>
+                    <button onclick="window.print()" class="mt-6 w-full py-2.5 bg-slate-900 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-lto-dark transition-all shadow-md">
+                        <i class="bi bi-printer mr-1"></i> Print System ID
+                    </button>
+                </div>
+
+                <div class="flex-1 grid grid-cols-2 gap-y-4 gap-x-6">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">License No.</p>
+                        <p id="view-license" class="text-sm font-bold text-slate-700 font-mono">---</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date of Birth / Gender</p>
+                        <p id="view-age-gender" class="text-sm font-bold text-slate-700">---</p>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</p>
+                        <p id="view-email" class="text-sm font-semibold text-slate-700">---</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mobile Number</p>
+                        <p id="view-phone" class="text-sm font-semibold text-slate-700">---</p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Reg. Date</p>
+                        <p id="view-reg-date" class="text-sm font-semibold text-slate-700">---</p>
+                    </div>
+
+                    <div class="col-span-2 pt-4 border-t border-slate-100">
+                        <h5 class="text-[10px] font-bold text-red-500 uppercase flex items-center gap-2 mb-3 tracking-widest">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Incident History
+                        </h5>
+                        <div id="historyList" class="space-y-2 max-h-[100px] overflow-y-auto pr-2">
+                            <p class="text-[11px] text-slate-400 italic">No violation records found.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ✅ CUSTOM SMS MODAL -->
+    <div id="smsModalOverlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+        <div class="bg-gradient-to-r from-amber-500 to-amber-400 px-6 py-5">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center">
+              <i class="bi bi-chat-left-dots text-white text-lg"></i>
+            </div>
+            <div>
+              <p class="text-white/70 text-xs font-bold uppercase tracking-wider">Send Message</p>
+              <h3 id="smsModalName" class="text-white font-black text-base uppercase"></h3>
+            </div>
+          </div>
+        </div>
+        <div class="px-6 py-5">
+          <label class="text-xs font-black text-slate-400 uppercase tracking-wider">Message</label>
+          <textarea id="smsModalMessage" rows="5" class="w-full mt-2 p-4 bg-slate-50 border border-slate-100 rounded-2xl text-xs font-semibold text-slate-700 outline-none focus:border-amber-400 focus:bg-white transition-all resize-none"></textarea>
+          <p class="text-xs text-slate-400 font-bold mt-1">To: <span id="smsModalPhone" class="text-amber-500"></span></p>
+        </div>
+        <div class="px-6 pb-6 flex gap-3">
+          <button onclick="closeSMSModal()" class="flex-1 py-3 rounded-2xl border-2 border-slate-100 text-slate-400 font-black text-sm hover:bg-slate-50 transition-all">Cancel</button>
+          <button onclick="confirmSendSMS()" class="flex-1 py-3 rounded-2xl bg-amber-500 text-white font-black text-sm hover:bg-amber-600 transition-all flex items-center justify-center gap-2">
+            <i class="bi bi-send"></i> Send SMS
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ CUSTOM DELETE MODAL -->
+    <div id="deleteModalOverlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+      <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+        <div class="px-6 py-8 text-center">
+          <div class="w-16 h-16 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
+            <i class="bi bi-trash text-red-500 text-2xl"></i>
+          </div>
+          <h3 class="text-slate-800 font-black text-lg">Delete Record?</h3>
+          <p class="text-slate-400 text-sm font-semibold mt-2">This action cannot be undone. Are you sure?</p>
+        </div>
+        <div class="px-6 pb-6 flex gap-3">
+          <button onclick="closeDeleteModal()" class="flex-1 py-3 rounded-2xl border-2 border-slate-100 text-slate-400 font-black text-sm hover:bg-slate-50 transition-all">Cancel</button>
+          <button onclick="confirmDelete()" class="flex-1 py-3 rounded-2xl bg-red-500 text-white font-black text-sm hover:bg-red-600 transition-all flex items-center justify-center gap-2">
+            <i class="bi bi-trash"></i> Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ TOAST -->
+    <div id="clientToast" class="hidden fixed top-5 left-1/2 -translate-x-1/2 z-[99999] px-5 py-3 rounded-2xl text-white text-xs font-bold shadow-xl transition-all"></div>
+<script src="js/clients.js"></script>  
+<script src="js/utils.js"></script>  
+</body>
+</html>

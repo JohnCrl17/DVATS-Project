@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTO ADMIN | Dasmariñas</title>
+    <link rel="icon" type="image/png" href="assets/image/logo-5.png">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // "Light na medyo Dark" Green para sa Background
+                        lto: { 
+                            base: '#4ade80',  // Base green (Presko)
+                            dark: '#166534',  // Para sa text accents
+                            light: '#bbf7d0' 
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        #sidebar {
+            background-color: #00A36C; 
+            color: #1e293b; 
+            z-index: 50;
+        }
+
+        /* Standard Collapse Width */
+        .collapsed { width: 85px !important; }
+        .main-expanded { margin-left: 85px !important; }
+
+        /* Nav Item Base - Full Sidebar */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            padding: 0.8rem 1.5rem !important;
+            border-radius: 12px !important;
+            transition: all 0.2s ease;
+            margin: 0.5rem 1rem;
+            color: #334155; 
+            font-weight: 600;
+            text-decoration: none !important;
+        }
+
+        .active-nav {
+            background-color: white !important;
+            color: #00A36C !important;
+            font-weight: 800;
+        }
+
+        /* --- THE FIX: PARA LUMAPAT SA CONTENT (SCREENSHOT 567) --- */
+
+        /* Alisin ang padding ng nav container sa collapsed mode para madikit ang box */
+        .collapsed nav { padding-left: 0 !important; padding-right: 0 !important; }
+        .collapsed #navContainer { space-y-2; }
+
+        .collapsed .nav-item {
+            /* Dito natin ididikit sa kanang dulo */
+            margin: 8px 0 8px 15px !important; 
+            width: 70px !important; /* Fixed width */
+            height: 55px !important;
+            padding: 0 !important;
+            justify-content: center !important;
+            border-radius: 20px 0 0 20px !important; /* Round sa kaliwa, flat sa kanan */
+            transform: none !important;
+        }
+
+        /* Active State para sa Collapsed - Ito yung puting "Tab" */
+        .collapsed .active-nav {
+            background-color: white !important;
+            color: #00A36C !important;
+            /* Force sagad sa kanan */
+            width: 70px !important; 
+            margin-left: 15px !important; 
+            box-shadow: none !important;
+        }
+
+        .collapsed .nav-item i { font-size: 1.5rem !important; margin: 0 !important; }
+
+        /* Hide text & brand elements */
+        .collapsed .link-text, .collapsed .brand-name, .collapsed .admin-only p {
+            display: none !important;
+        }
+
+        /* UI Polishing */
+        .hover-lift { transition: all 0.3s ease; cursor: pointer; }
+        .hover-lift:hover { transform: translateY(-8px); box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1); }
+
+        /* Siguraduhin na ang footer ay laging nasa ilalim */
+        .sidebar-footer {
+            margin-top: auto; 
+        }
+
+        /* Logout Specific Hover */
+        .logout-link:hover {
+            background-color: #fee2e2 !important; /* light red */
+            color: #dc2626 !important; /* dark red */
+        }
+
+        /* --- THE FIX PARA SA COLLAPSED DESIGN --- */
+        .collapsed .sidebar-footer {
+            padding: 10px 0 !important;
+            display: flex;
+            justify-content: center;
+        }
+
+        .collapsed .logout-link {
+            /* Kaparehas ng style ng nav-items mo sa clients */
+            margin: 8px 0 8px 15px !important; 
+            width: 70px !important; 
+            height: 55px !important;
+            padding: 0 !important;
+            justify-content: center !important;
+            border-radius: 20px 0 0 20px !important; 
+            background-color: transparent;
+        }
+
+        /* Para maging center ang icon sa loob */
+        .collapsed .logout-link i {
+            font-size: 1.5rem !important;
+            margin: 0 !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 overflow-x-hidden">
+
+<div class="flex min-h-screen">
+    
+    <aside id="sidebar" class="sidebar-transition fixed inset-y-0 left-0 z-50 w-64 shadow-2xl overflow-hidden">
+        <div class="flex flex-col h-full">
+            <div class="p-6 border-b border-black/5 flex items-center justify-between">
+                <button id="sidebarToggle" class="flex items-center gap-3 w-full hover:bg-black/5 p-2 rounded-xl transition-all outline-none">
+                    <i class="bi bi-list text-3xl text-slate-800"></i>
+                    <span class="brand-name font-black tracking-tighter text-xl uppercase italic whitespace-nowrap text-slate-900">Dasma Admin</span>
+                </button>
+            </div>
+
+            <nav class="flex-1 px-4 py-6 flex flex-col justify-start overflow-y-auto">
+                <div id="navContainer" class="space-y-2">
+                    <a href="dashboard.html" class="nav-item active-nav">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span class="link-text text-md">Dashboard</span>
+                    </a>
+                    <a href="clients.html" class="nav-item">
+                        <i class="bi bi-people-fill"></i>
+                        <span class="link-text text-md">Violators</span>
+                    </a>
+                    <a href="violations.html" class="nav-item">
+                        <i class="bi bi-exclamation-octagon-fill"></i>
+                        <span class="link-text text-md">Violations</span>
+                    </a>
+                    <a href="master_violations.html" class="nav-item">
+                        <i class="bi-car-front-fill"></i>
+                        <span class="link-text text-md">City ORD</span>
+                    </a>
+                    <a href="appointments.html" class="nav-item">
+                        <i class="bi bi-calendar-week-fill"></i>
+                        <span class="link-text text-md">Appointments</span>
+                    </a>
+                    <a href="enforcers.html".html" class="nav-item">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        <span class="link-text text-md">Enforcers</span>
+                    </a>
+
+                    <div class="admin-only pt-4 border-t border-black/10 mt-4">
+                        <p class="link-text px-4 text-xs font-bold text-slate-600 uppercase tracking-widest mb-2">System</p>
+                        <a href="settings.html" class="nav-item">
+                            <i class="bi bi-gear-fill"></i>
+                            <span class="link-text text-md">Settings</span>
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="p-4 mt-auto border-t border-black/5 sidebar-footer">
+            <a href="#" class="nav-item logout-link text-red-600 hover:bg-red-50">
+                <i class="bi bi-box-arrow-right"></i>
+                <span class="link-text uppercase text-xs font-bold">Logout</span>
+            </a>
+        </div>
+        </div>
+    </aside>
+
+    <main id="mainContent" class="flex-1 ml-64 sidebar-transition h-screen flex flex-col bg-slate-50 overflow-hidden">
+        
+        <div class="flex-none bg-slate-50 z-40 shadow-sm">
+            <header class="bg-white px-10 h-[100px] flex items-center justify-between border-b border-slate-100 relative">
+                <div class="h-full py-3 z-10">
+                    <img src="assets/image/header-removebg-preview.png" alt="LTO" class="h-full w-auto object-contain mix-blend-multiply">
+                </div>
+
+                <div class="absolute left-1/2 transform -translate-x-1/2 text-center pointer-events-none w-full flex justify-center">
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tighter uppercase italic leading-tight"> 
+                        Traffic Management System
+                    </h2>
+                </div>
+                
+                <div class="text-right flex flex-col items-end z-10">
+                    <p class="text-[10px] font-black text-green-600 uppercase tracking-[0.2em] mb-1">Philippine Standard Time</p>
+                    <div id="pst-time" class="text-[13px] font-black text-slate-700 font-mono bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">
+                        Loading Time...
+                    </div>
+                </div>
+            </header>
+
+            <div class="px-10 py-6">
+                <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="hover-lift bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 bg-green-50 text-green-600 rounded-xl flex items-center justify-center text-2xl italic font-black"><span id="clientsCount">0</span></div>
+                        <div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total Clients</p>
+                            <h3 class="text-md font-bold text-slate-700 italic">Verified</h3>
+                        </div>
+                    </div>
+                    <div class="hover-lift bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 bg-red-50 text-red-600 rounded-xl flex items-center justify-center text-2xl italic font-black"><span id="violationsCount">0</span></div>
+                        <div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Violations</p>
+                            <h3 class="text-md font-bold text-slate-700 italic">Pending</h3>
+                        </div>
+                    </div>
+                    <div class="hover-lift bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-2xl italic font-black"><span id="appointmentsCount">0</span></div>
+                        <div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Appointments</p>
+                            <h3 class="text-md font-bold text-slate-700 italic">Today</h3>
+                        </div>
+                    </div>
+                    <div class="hover-lift bg-white p-6 rounded-[2rem] border-b-4 border-green-500 shadow-sm flex items-center gap-4">
+                        <div class="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-xl flex items-center justify-center text-2xl italic font-black">
+                            <span id="enforcersCount">0</span>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Enforcers</p>
+                            <h3 class="text-md font-bold text-slate-700 italic">Registered</h3>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="flex-1 px-10 pb-6 flex flex-col min-h-0">
+            <div class="bg-white rounded-[3rem] shadow-xl shadow-slate-200/50 border border-slate-100 flex flex-col h-full overflow-hidden">
+                <div class="flex-none p-8 border-b border-slate-50 flex flex-col lg:flex-row justify-between items-center gap-6">
+                    <div>
+                        <h5 class="text-xl font-black italic tracking-tighter text-slate-800 uppercase">System Activity Log</h5>
+                        <p class="text-[11px] text-slate-400 font-medium uppercase tracking-widest mt-1">Live Transaction Stream</p>
+                    </div>
+                    <div class="relative w-full lg:w-80 group">
+                        <i class="bi bi-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-lg group-focus-within:text-green-600 transition-colors"></i>
+                        <input type="text" id="dashboardSearch" placeholder="Search transactions..." class="w-full pl-12 pr-6 py-3 bg-slate-50 rounded-2xl text-sm border-2 border-transparent focus:border-green-500 focus:bg-white outline-none transition-all shadow-inner">
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200">
+                    <table class="w-full text-left border-collapse" id="activityTable">
+                        <thead class="sticky top-0 bg-white/95 backdrop-blur-sm z-10 shadow-sm">
+                            <tr class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                                <th class="px-10 py-4 border-b border-slate-50">Type</th>
+                                <th class="px-10 py-4 border-b border-slate-50">Details</th>
+                                <th class="px-10 py-4 border-b border-slate-50">Timestamp</th>
+                                <th class="px-10 py-4 border-b border-slate-50 text-right">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activityList" class="divide-y divide-slate-50 font-bold text-[13px] text-slate-600">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

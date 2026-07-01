@@ -1,0 +1,236 @@
+/* --- 1. Global & Background --- */
+:root {
+    --lto-red: #e60000;
+    --lto-red-hover: #ff1a1a;
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
+}
+
+body.portal-home {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    /* Improved Professional Gradient Overlay */
+    background: linear-gradient(rgba(20, 40, 20, 0.75), rgba(10, 20, 40, 0.85)), 
+                url('../assets/image/lto-bg2.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* --- 2. Navigation Bar --- */
+.portal-navbar {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 12px 0;
+    backdrop-filter: blur(10px);
+}
+
+.brand-text {
+    color: white;
+    letter-spacing: 1.5px;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.nav-link-custom {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.nav-link-custom:hover {
+    color: #ffffff;
+    transform: translateY(-2px);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.nav-link-custom i {
+    transition: transform 0.3s ease;
+}
+
+.nav-link-custom:hover i {
+    transform: rotate(15deg);
+}
+
+.nav-link-custom::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -5px;
+    left: 0;
+    background-color: var(--lto-red);
+    transition: width 0.3s ease;
+}
+
+.nav-link-custom:hover::after {
+    width: 100%;
+}
+
+/* --- 3. Hero Section (Professional Card) --- */
+.hero-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    padding: 4rem 3rem;
+    border-radius: 35px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+    max-width: 800px;
+    width: 90%;
+}
+
+.hero-logo {
+    width: 130px;
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+}
+
+h1.display-3 {
+    font-weight: 800;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    text-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.tagline {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.85);
+    text-transform: uppercase;
+}
+
+/* --- 4. Satisfying Buttons --- */
+.btn-registration, .btn-login {
+    padding: 14px 45px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-registration {
+    background-color: var(--lto-red);
+    color: white;
+    border: none;
+}
+
+.btn-registration:hover {
+    background-color: var(--lto-red-hover);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(230, 0, 0, 0.4);
+}
+
+.btn-login {
+    border: 2px solid white;
+    color: white;
+}
+
+.btn-login:hover {
+    background-color: white;
+    color: #000 !important;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* --- 5. Footer --- */
+.footer-fixed {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    pointer-events: none;
+}
+
+.footer-item {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* Shared styling to ensure identical size */
+/* Shared Button Foundation */
+.btn-portal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Dimensions - adjust these to change size of BOTH */
+    min-width: 220px; 
+    height: 55px;
+    padding: 0 30px;
+    
+    /* Typography - identical to your Login style */
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    text-decoration: none;
+    
+    /* Animation */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: pointer;
+}
+
+/* Specific Colors for Registration */
+.btn-registration {
+    /* Use !important to force the color if Bootstrap is blocking it */
+    background-color: #0046ad !important; 
+    color: white !important;
+    border: 2px solid #0046ad !important;
+    
+    /* Layout & Styling */
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    text-decoration: none; /* In case it's an <a> tag */
+}
+
+/* Hover State */
+.btn-registration:hover {
+    background-color: #002b6b !important; /* Darker blue on hover */
+    border-color: #002b6b !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 70, 173, 0.4);
+}
+
+/* Specific Colors for Log In */
+.btn-login {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+}
+
+.btn-login:hover {
+    background-color: white;
+    color: #000 !important; /* Forces text to black on hover like modern portals */
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.3);
+}

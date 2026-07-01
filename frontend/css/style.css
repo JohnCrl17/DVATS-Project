@@ -1,0 +1,23 @@
+body {
+    background: linear-gradient(to right, #004aad, #0072ce); /* LTO blue vibe */
+    color: #fff;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+}
+
+.card h6 {
+    font-weight: 600;
+}
+
+.modal-content {
+    border-radius: 15px;
+}
+
+#video {
+    border: 3px solid #004aad;
+    border-radius: 10px;
+}
+

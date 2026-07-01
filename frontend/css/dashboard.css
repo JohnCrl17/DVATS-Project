@@ -1,0 +1,691 @@
+/* --- ROOT VARIABLES --- */
+:root {
+    /* Professional Government Green Palette */
+    --lto-green: #107c10;       /* Primary Green */
+    --lto-dark-green: #0a5a0a;  /* Darker shade for gradients */
+    --lto-sidebar-active: #ffffff; 
+    
+    --sidebar-width: 260px;
+    --sidebar-collapsed: 87px;
+}
+
+/* --- BASE STYLES --- */
+body {
+    background-color: var(--bg-light);
+    font-family: 'Inter', sans-serif;
+    color: #334155;
+}
+
+.dashboard-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* --- SIDEBAR --- */
+/* --- SIDEBAR BASE --- */
+.sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    /* Updated to Green Gradient */
+    background: linear-gradient(180deg, var(--lto-green) 0%, var(--lto-dark-green) 100%);
+    position: fixed;
+    top: 0; left: 0;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+
+/* --- THE MINI-BAR STATE (YouTube Style) --- */
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed) !important; /* Shrunk to 80px */
+}
+
+/* Hide all text labels when collapsed */
+.sidebar.collapsed .brand-name,
+.sidebar.collapsed .brand-subtitle,
+.sidebar.collapsed .nav-link span,
+.sidebar.collapsed .logout-link span,
+.sidebar.collapsed .logo-details {
+    opacity: 0;
+    visibility: hidden;
+    display: none !important;
+}
+
+/* Center the icons in the mini-bar */
+.nav-link, .logout-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Default: Icon + Text */
+    transition: padding 0.3s ease;
+}
+
+.sidebar.collapsed .nav-link, 
+.sidebar.collapsed .logout-link {
+    justify-content: center; /* Center icons when text is gone */
+    padding: 15px 0;
+}
+
+.nav-link i, .logout-link i {
+    font-size: 1.5rem;
+    min-width: 25px;
+    margin-right: 15px; /* Space between icon and text */
+    transition: margin 0.3s ease;
+}
+
+.sidebar.collapsed .nav-link i, 
+.sidebar.collapsed .logout-link i {
+    margin-right: 0; /* Remove margin to center the icon perfectly */
+}
+
+/* --- MAIN CONTENT ADJUSTMENT --- */
+    .main-content {
+        margin-left: var(--sidebar-width);
+        transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+.main-content.expanded {
+    margin-left: var(--sidebar-collapsed) !important; /* Move content to the left */
+}
+
+/* Logo Section */
+.logo-section {
+    padding: 30px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
+    transition: padding 0.3s ease;
+}
+
+.brand-logo {
+    width: 70px;
+    height: auto;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+    transition: width 0.3s ease;
+}
+
+.brand-name {
+    color: white;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 1.5px;
+    margin-top: 10px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.brand-subtitle {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+/* Navigation Menu */
+.nav-menu {
+    list-style: none;
+    padding: 20px 10px;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 23px 18px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    border-radius: 12px;
+    margin: 4px 0;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.nav-link i {
+    font-size: 1.25rem;
+    margin-right: 15px;
+    min-width: 25px;
+    text-align: center;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-link.active {
+    background: white;
+    /* This makes the text green when the tab is selected */
+    color: var(--lto-green); 
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+    padding: 20px 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logout-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px;
+    color: #ff9999;
+    text-decoration: none;
+    transition: 0.3s;
+    white-space: nowrap;
+}
+
+/* --- MAIN CONTENT AREA --- */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex-grow: 1;
+    padding: 30px;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: visible !important;
+}
+
+.main-content.expanded {
+    margin-left: var(--sidebar-collapsed) !important;
+}
+
+/* --- COLLAPSED STATE VISIBILITY --- */
+.sidebar.collapsed .brand-name,
+.sidebar.collapsed .brand-subtitle,
+.sidebar.collapsed .nav-link span,
+.sidebar.collapsed .logout-link span {
+    display: none !important;
+}
+
+.sidebar.collapsed .brand-logo {
+    width: 40px;
+}
+
+.sidebar.collapsed .logo-section {
+    padding: 20px 0;
+}
+
+/* Center icons when collapsed */
+.sidebar.collapsed .nav-link i {
+    margin-right: 0;
+    width: 100%;
+}   
+
+/* Stats Cards & Header (Unchanged) */
+.header {
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+    margin-bottom: 30px;
+}
+.bg-primary-light { background: #e7f0ff; }
+.bg-danger-light { background: #ffe7e7; }
+.bg-warning-light { background: #fff8e1; }
+.bg-success-light { background: #e8f5e9; }
+.welcome-banner {
+    background: linear-gradient(135deg, var(--lto-blue) 0%, var(--lto-dark-blue) 100%);
+    box-shadow: 0 10px 20px rgba(0, 70, 173, 0.2);
+}
+.avatar {
+    width: 40px; height: 40px; background: var(--lto-blue);
+    color: white; border-radius: 10px; display: flex;
+    align-items: center; justify-content: center; font-weight: bold;
+}
+
+/* 2. FIX THE SIDEBAR BUTTON (Make it clean) */
+.btn-toggle {
+    font-size: 1.5rem; /* Larger icon */
+    transition: all 0.3s ease;
+    width: 100%; /* Take full width of mini-bar */
+    padding: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.sidebar.collapsed .brand-logo,
+.sidebar.collapsed .logo-details,
+.sidebar.collapsed .nav-link span,
+.sidebar.collapsed .logout-link span {
+    display: none !important;
+}
+
+.btn-toggle-custom {
+    background: transparent;
+    border: none;
+    width: 100%; /* Force it to match the sidebar width */
+    height: 64px; /* Match the container height */
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 24px; /* Default padding for the open state */
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logo-section {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 56px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2); /* Slightly darker for depth */
+}
+
+.nav-link i, .btn-toggle-custom i, .logout-link i {
+    font-size: 1.4rem; /* uniform size for all icons */
+    min-width: 25px;
+    transition: margin 0.3s ease;
+}
+
+.sidebar.collapsed i {
+    margin-right: 0 !important;
+}
+
+.brand-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    
+    /* Force the text to have no extra space above or below */
+    line-height: 1; 
+    margin: 0; 
+    margin-left: 0px; /* Spacing from the icon */
+    
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.btn-toggle-custom i {
+    font-size: 1.5rem; /* Make the 'list' icon clearly visible */
+    min-width: 24px;   /* Match the width of your other nav icons */
+    display: flex;
+    justify-content: center;
+}
+
+.sidebar.collapsed .btn-toggle-custom {
+    padding: 0; /* Remove side padding */
+    justify-content: center; /* Center the icon perfectly in the 80px bar */
+}
+
+.sidebar.collapsed .brand-name {
+    display: none !important;
+}
+
+/* Ensure the blue hover effect fills the whole width of the mini-bar */
+.btn-toggle-custom:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* --- LOGOUT LINK STYLES --- */
+.logout-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px; /* Same padding as nav-links */
+    color: #ff9999; /* Reddish color for logout */
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    border-radius: 12px;
+    padding: 0 !important; /* This removes the gaps you circled in red */
+    margin: 0 !important;
+}
+
+.logout-link i {
+    font-size: 1.4rem;
+    min-width: 25px;
+    margin-right: 15px; /* Spacing for the open state */
+    text-align: center;
+    transition: margin 0.3s ease;
+}
+
+.logout-link:hover {
+    background: rgba(255, 0, 0, 0.1); /* Subtle red hover */
+    color: #ff4d4d;
+}
+
+/* --- COLLAPSED (MINI-BAR) LOGOUT --- */
+.sidebar.collapsed .logout-link {
+    justify-content: center; /* Center the icon */
+    padding: 15px 0;
+}
+
+.sidebar.collapsed .logout-link span {
+    display: none !important; /* Hide the word 'Logout' */
+}
+
+.sidebar.collapsed .logout-link i {
+    margin-right: 0; /* Remove the right margin to center perfectly */
+}
+
+/* Ensure the footer matches the mini-bar width */
+.sidebar.collapsed .sidebar-footer {
+    padding: 10px 0;
+    text-align: center;
+}
+
+/* --- MINI LOGO STYLING --- */
+.mini-sidebar-logo {
+    width: 30px;      /* Adjust size as needed */
+    height: auto;
+    margin-right: 5px; /* Adjust this number higher for more space */
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    transition: all 0.3s ease;
+}
+
+/* Ensure the button stays perfectly centered with 3 elements now */
+.btn-toggle-custom {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 20px;
+}
+
+/* --- COLLAPSED LOGIC --- */
+/* Hide both the image and the text when the sidebar is closed */
+.sidebar.collapsed .mini-sidebar-logo,
+.sidebar.collapsed .brand-name {
+    display: none !important;
+}
+
+/* Center the list icon alone when closed */
+.sidebar.collapsed .btn-toggle-custom {
+    justify-content: center;
+    padding: 0;
+}
+
+/* --- NAVIGATION HOVER ANIMATION --- */
+.nav-link {
+    /* ... keep your existing styles ... */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Smoother movement */
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.15); /* Light highlight */
+    color: white;
+    
+    /* This moves the content 8px to the right */
+    transform: translateX(8px); 
+    
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Also apply it to Logout for consistency */
+.logout-link:hover {
+    transform: translateX(8px);
+    background: rgba(255, 0, 0, 0.1);
+}
+
+/* new */
+.nav-link span, .logout-link span {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* When the sidebar is open and you hover, make the text pop slightly */
+.nav-link:hover span {
+    letter-spacing: 0.5px; /* Subtle text expansion */
+}
+
+/* Effect for when sidebar is CLOSED */
+.sidebar.collapsed .nav-link:hover,
+.sidebar.collapsed .logout-link:hover {
+    transform: scale(1.1); /* Makes the icon 10% larger instead of moving it */
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Keep the move effect only when sidebar is OPEN */
+.sidebar:not(.collapsed) .nav-link:hover {
+    transform: translateX(10px);
+}
+
+.stat-card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    border: 1px solid #edf2f7;
+}
+.stat-icon {
+    width: 55px; height: 55px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-right: 20px;
+}
+
+/* --- FIXING THE DASHBOARD CARD HOVER --- */
+.stat-card {
+    /* This tells the browser to animate the movement */
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    background: white; /* Ensures the card is solid when it lifts */
+    transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    z-index: 5;
+    font-weight: bold;
+}
+
+.stat-card:hover {
+    /* The Lift Effect */
+    transform: translateY(-10px) !important; 
+    /* The Shadow Effect (Makes it look like it's floating) */
+    box-shadow: 0 15px 35px rgba(10, 90, 10, 0.25);
+    /* Optional: Slight border color change */
+    border-color: rgba(255, 255, 255, 0.3);
+    z-index: 10; /* Brings the card to the very front */
+}
+
+/* Make sure the icons inside also react */
+.stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(5deg);
+    transition: transform 0.3s ease;
+}
+
+/* Adjust the icon box inside the card for better contrast */
+.stat-card .icon-box {
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+/* Make the title text slightly transparent for hierarchy */
+.stat-card .stat-title {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+/* Make the large number pop */
+.stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+/* Make sure the main-content doesn't clip the 'lifted' card */
+
+/* --- MAIN HEADER CONTAINER --- */
+.official-gov-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 25px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-bottom: 1px solid #eee;
+}
+
+/* --- BANNER (LEFT) --- */
+.header-banner-left {
+    flex: 2; /* Gives more room to the banner */
+}
+
+.main-banner-img {
+    height: 130px; /* Adjust based on your 'top-logo.png' height */
+    width: auto;
+    object-fit: contain;
+}
+
+/* --- TIME & SEALS (RIGHT) --- */
+.header-info-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end; /* Aligns clock and seals to the right */
+    text-align: right;
+}
+
+.pst-label {
+    font-size: 0.9rem;
+    color: black;
+    font-weight: 500;
+    margin-bottom: 0;
+}
+
+.pst-time-display {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: black;
+    font-family: Arial, sans-serif;
+    margin-bottom: 8px;
+}
+
+.mini-seal-img {
+    height: 70px; /* Adjust size of transparency logos */
+    width: auto;
+    opacity: 0.9;
+}
+
+
+/* Search Bar Styling */
+.search-container {
+    background: white;
+    padding: 15px 25px;
+    border-radius: 1px;
+    margin-top: 50px;
+    margin-bottom: 25px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid #edf2f7;
+}
+
+.search-container i {
+    color: #003399;
+    font-size: 1.2rem;
+}
+
+.search-container input {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    font-size: 1rem;
+    outline: none;
+    background: transparent;
+}
+
+/* Table Styling */
+.table-card {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+.lto-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+/* Header Text */
+.table-header h5 {
+    color: var(--lto-dark-green);
+    letter-spacing: -0.5px;
+}
+
+.lto-table thead th {
+    background-color: #f8fafc; /* Matches your Slate background */
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 1px;
+    padding: 15px 20px;
+    border-bottom: 2px solid #edf2f7;
+}
+
+.lto-table tbody td {
+    padding: 18px 20px;
+    color: #334155;
+    font-size: 0.9rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.lto-table tbody tr:hover {
+    background-color: #f0fdf4 !important; /* Very soft green tint on hover */
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.status-scheduled { background: #fef3c7; color: #92400e; } /* Amber */
+.status-registered { background: #dcfce7; color: #166534; } /* Green */
+.status-paid { background: #ecfdf5; color: #065f46; }       /* Emerald */
+
+.lto-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.lto-table th {
+    text-align: left;
+    padding: 12px;
+    background: #f8f9fa;
+    color: #666;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.lto-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+}
+
+/* Status & Tags */
+.status-pill {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.success { background: #e6f7ed; color: #28a745; }
+.warning { background: #fff4e5; color: #ff9800; }
+
+.v-tag {
+    background: #f1f3f9;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: #003399;
+}

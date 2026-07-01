@@ -1,0 +1,61 @@
+body {
+    margin: 0;
+    background-color: #f4f6f9;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* Sidebar (same as dashboard) */
+.sidebar {
+    width: 230px;
+    background-color: #002b5c;
+    color: #fff;
+    min-height: 100vh;
+    padding: 20px 0;
+}
+
+.sidebar .logo {
+    width: 70px;
+}
+
+.sidebar .nav-link {
+    color: #d1d1d1;
+    padding: 12px 25px;
+}
+
+.sidebar .nav-item.active,
+.sidebar .nav-link:hover {
+    background-color: #003a8f;
+    color: #fff;
+}
+
+.logout {
+    margin-top: auto;
+}
+
+/* Content */
+.content {
+    flex: 1;
+    padding: 25px 30px;
+}
+
+/* Header */
+.header {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+/* Table */
+table {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table-primary th {
+    background-color: #003a8f !important;
+    color: white;
+}
+
+.modal-header {
+    border-bottom: none;
+}

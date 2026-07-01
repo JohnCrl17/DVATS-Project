@@ -1,0 +1,95 @@
+{
+  "expo": {
+    "name": "DVATS",
+    "slug": "lto-mobile",
+    "version": "1.0.1",
+    "orientation": "portrait",
+    "icon": "./app/assets/images/logo.png",
+    "scheme": "ltomobile",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "jsEngine": "hermes",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dvats.enforcer.terminal",
+      "infoPlist": {
+        "NSCameraUsageDescription": "DVATS requires camera access to scan licenses and verify driver identity.",
+        "NSFaceIDUsageDescription": "DVATS uses Face ID for secure officer authentication."
+      }
+    },
+    "android": {
+      "package": "com.dvats.enforcer.terminal",
+      "versionCode": 2,
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./app/assets/images/logo.png"
+      },
+      "permissions": [
+        "CAMERA",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "VIBRATE",
+        "android.permission.CAMERA",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.RECORD_AUDIO",
+        "CAMERA",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "VIBRATE",
+        "android.permission.CAMERA",
+        "android.permission.USE_BIOMETRIC",
+        "android.permission.USE_FINGERPRINT",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./app/assets/images/logo.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow DVATS to use the camera to scan licenses."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow DVATS to use Face ID for secure login."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./app/assets/images/logo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0f172a"
+        }
+      ],
+      "expo-asset",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "04cd4556-be50-4abe-9c76-342bafb27f86"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/04cd4556-be50-4abe-9c76-342bafb27f86"
+    }
+  }
+}

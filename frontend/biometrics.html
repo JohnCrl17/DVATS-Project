@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTO Admin | Secure Enforcer Enrollment</title>
+    <link rel="icon" type="image/png" href="assets/image/logo-5.png">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #F0F4F8; 
+            min-height: 100vh;
+        }
+
+        .step-hidden { display: none !important; }
+
+        .glass-panel {
+            background: white;
+            border-radius: 40px;
+            box-shadow: 0 40px 100px -20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .info-sidebar {
+            background: linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%);
+            color: white;
+            padding: 4rem 3rem;
+            position: relative;
+        }
+
+        .form-control, .form-select {
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 14px 20px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .capture-area {
+            background: #0f172a;
+            border-radius: 24px;
+            height: 250px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid #e2e8f0;
+        }
+
+        .success-overlay {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #10b981;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: 800;
+            display: none;
+            z-index: 30;
+        }
+
+        .btn-finalize {
+            background: #2563eb;
+            color: white;
+            border-radius: 18px;
+            padding: 18px;
+            font-weight: 800;
+            width: 100%;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        .btn-finalize:hover:not(:disabled) {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        #qr-display canvas {
+            margin: 0 auto;
+            border: 8px solid white;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <div class="container glass-panel max-w-6xl p-0 flex flex-col md:flex-row">
+        
+        <div class="info-sidebar w-full md:w-5/12 flex flex-col justify-between">
+            <div class="z-10">
+                <h4 class="text-blue-200 font-bold tracking-[4px] uppercase text-[10px] mb-4">Official LTO Admin Panel</h4>
+                <h1 class="text-5xl font-extrabold mb-6 leading-[1.1]">Enforcer <br><span class="text-white">Enrollment.</span></h1>
+                <p class="text-blue-100/70 text-lg">Register official law enforcers, capture biometric identity, and issue terminal access QR keys.</p>
+            </div>
+
+            <div class="z-10 pt-8">
+                <a href="index.html" class="inline-flex items-center gap-3 text-white/80 hover:text-white no-underline font-bold text-sm">
+                    <i class="bi bi-arrow-left-circle-fill text-xl"></i> HOME
+                </a>
+            </div>
+        </div>
+
+        <div class="w-full md:w-7/12 p-10 md:p-16 bg-white">
+            
+            <div id="step-info">
+                <div class="mb-10">
+                    <span class="bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest">Step 01 / 02</span>
+                    <h2 class="text-3xl font-black text-slate-900 mt-4">Enforcer Credentials</h2>
+                </div>
+
+                <form id="registrationForm" class="row g-4">
+                    <div class="col-12">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name (Last Name, First Name, M.I.)</label>
+                        <input type="text" id="fullname" class="form-control" placeholder="e.g. Makasalanan, Juan P." required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Official Badge Number</label>
+                        <input type="text" id="badge_no" class="form-control" placeholder="e.g. DASMA-ENF-2026" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Assigned Unit / Branch</label>
+                        <select id="unit" class="form-select" required>
+                            <option value="">Select Unit</option>
+                            <option value="TMO Dasmariñas">TMO Dasmariñas</option>
+                            <option value="LTO District Office">LTO District Office</option>
+                            <option value="PNP Highway Patrol Group">PNP Highway Patrol Group</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Account Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="password" class="form-control pr-10" placeholder="Minimum 6 characters" required>
+                            <span onclick="togglePassword()" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer;">👁️</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Date of Birth</label>
+                        <input type="date" id="dob" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Gender</label>
+                        <select id="gender" class="form-select" required>
+                            <option value="">Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                        <input type="email" id="email" class="form-control" placeholder="officer@domain.com" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Mobile Hotline (For SMS Alerts)</label>
+                        <input type="text" id="phone_number" class="form-control" placeholder="09XXXXXXXXX" maxlength="11" required>
+                    </div>
+
+                    <div class="col-12 mt-8">
+                        <button type="button" class="btn-finalize" onclick="proceedToBiometrics()">
+                            PROCEED TO FACE CAPTURE <i class="bi bi-chevron-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="step-biometrics" class="step-hidden">
+                <div class="mb-10">
+                    <span class="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest">Step 02 / 02</span>
+                    <h2 class="text-3xl font-black text-slate-900 mt-4">Secure Face Enrollment</h2>
+                </div>
+
+                <div class="row g-4 text-center justify-content-center">
+                    <div class="col-md-8">
+                        <div class="capture-area mb-4">
+                            <video id="webcam" class="w-full h-full object-cover" autoplay playsinline></video>
+                            <canvas id="snapshot" class="w-full h-full object-cover" style="display: none;"></canvas>
+                            <div id="face-status" class="success-overlay">FACE LOCKED</div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn bg-slate-100 w-full py-3 rounded-xl font-bold" id="btn-capture" onclick="captureFace()">
+                                <i class="bi bi-camera me-2"></i> CAPTURE FACE
+                            </button>
+                            <button type="button" class="btn bg-slate-100 w-full py-3 rounded-xl font-bold" id="btn-retake" onclick="retakeFace()" style="display:none;">
+                                <i class="bi bi-arrow-counterclockwise me-2"></i> RETAKE PHOTO
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="finalize-area" class="mt-12 pt-8 border-t">
+                    <button id="btn-submit-all" class="btn-finalize" onclick="submitRegistration()" disabled>
+                        SAVE ENFORCER & ISSUE ID
+                    </button>
+                    <p class="text-center text-[10px] text-slate-400 mt-3 font-bold uppercase tracking-widest">Admin confirmation: Biometric verification required</p>
+                </div>
+            </div>
+
+            <div id="step-success" class="step-hidden text-center">
+                <div class="mb-8">
+                    <i class="bi bi-shield-check text-emerald-500 text-6xl"></i>
+                    <h2 class="text-3xl font-black text-slate-900 mt-4">Enforcer Activated!</h2>
+                    <p class="text-slate-500">The credentials and face token have been written to the secure database.</p>
+                </div>
+
+                <div id="qr-display" class="mb-8 p-4 bg-slate-100 rounded-[40px] inline-block shadow-inner"></div>
+
+                <div class="flex flex-col gap-3">
+                    <button onclick="downloadQR()" class="btn-finalize no-underline flex items-center justify-center gap-2">
+                        <i class="bi bi-download"></i> DOWNLOAD SECURE QR TOKEN
+                    </button>
+                    <button onclick="window.location.reload()" class="btn text-slate-400 font-bold uppercase text-xs tracking-widest">ENROLL ANOTHER ENFORCER</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let tempEnforcerData = {};
+        let faceData = null;
+        let stream = null;
+
+        function togglePassword() {
+            const pField = document.getElementById("password");
+            pField.type = pField.type === "password" ? "text" : "password";
+        }
+
+        function proceedToBiometrics() {
+            const form = document.getElementById('registrationForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            tempEnforcerData = {
+                fullname: document.getElementById('fullname').value,
+                badge_no: document.getElementById('badge_no').value,
+                unit: document.getElementById('unit').value,
+                password: document.getElementById('password').value,
+                dob: document.getElementById('dob').value,
+                gender: document.getElementById('gender').value,
+                email: document.getElementById('email').value,
+                phone_number: document.getElementById('phone_number').value
+            };
+
+            document.getElementById('step-info').classList.add('step-hidden');
+            document.getElementById('step-biometrics').classList.remove('step-hidden');
+            
+            startCamera();
+        }
+
+        function startCamera() {
+            const video = document.getElementById('webcam');
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: true })
+                    .then(s => {
+                        stream = s;
+                        video.srcObject = stream;
+                        video.play();
+                    })
+                    .catch(err => alert("System Notice: Webcam device failed to open or access is blocked."));
+            }
+        }
+
+        function captureFace() {
+            const video = document.getElementById('webcam');
+            const canvas = document.getElementById('snapshot');
+            const faceStatus = document.getElementById('face-status');
+            const btnCapture = document.getElementById('btn-capture');
+            const btnRetake = document.getElementById('btn-retake');
+
+            if (video && canvas) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+
+                video.style.display = 'none';
+                canvas.style.display = 'block';
+
+                faceData = canvas.toDataURL('image/jpeg');
+                if (faceStatus) faceStatus.style.display = 'block';
+
+                btnCapture.style.display = 'none';
+                btnRetake.style.display = 'block';
+
+                const btnSubmit = document.getElementById('btn-submit-all');
+                btnSubmit.disabled = false;
+            }
+        }
+
+        function retakeFace() {
+            const video = document.getElementById('webcam');
+            const canvas = document.getElementById('snapshot');
+            const faceStatus = document.getElementById('face-status');
+            const btnCapture = document.getElementById('btn-capture');
+            const btnRetake = document.getElementById('btn-retake');
+            const btnSubmit = document.getElementById('btn-submit-all');
+
+            canvas.style.display = 'none';
+            video.style.display = 'block';
+
+            faceData = null;
+            if (faceStatus) faceStatus.style.display = 'none';
+
+            btnCapture.style.display = 'block';
+            btnRetake.style.display = 'none';
+            btnSubmit.disabled = true;
+        }
+
+        async function submitRegistration() {
+            const btnSubmit = document.getElementById('btn-submit-all');
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Writing securely to Server...`;
+
+            const qrContainer = document.getElementById('qr-display');
+            qrContainer.innerHTML = ""; 
+            
+            // Ang QR content ngayon ay nakatali sa official Badge Number ng Enforcer
+            new QRCode(qrContainer, {
+                text: tempEnforcerData.badge_no,
+                width: 256,
+                height: 256,
+                colorDark : "#1E3A8A",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            setTimeout(async () => {
+                const qrCanvas = qrContainer.querySelector('canvas');
+                let qrBase64 = qrCanvas ? qrCanvas.toDataURL('image/png') : (qrContainer.querySelector('img') ? qrContainer.querySelector('img').src : null);
+
+                const formData = new FormData();
+                for (let key in tempEnforcerData) {
+                    formData.append(key, tempEnforcerData[key]);
+                }
+                formData.append('face_data', faceData); 
+                formData.append('qr_image', qrBase64); 
+
+                try {
+                    // Ituturo natin ito sa bagong endpoint ng API mo mamaya
+                    const API_URL = "https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/insert_enforcer.php";
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: formData,
+                        headers: { 'ngrok-skip-browser-warning': 'true' }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status === "success") {
+                        if (stream) stream.getTracks().forEach(track => track.stop());
+                        document.getElementById('step-biometrics').classList.add('step-hidden');
+                        document.getElementById('step-success').classList.remove('step-hidden');
+                    } else {
+                        alert("Database Refusal: " + result.message);
+                        btnSubmit.disabled = false;
+                        btnSubmit.innerHTML = "SAVE ENFORCER & ISSUE ID";
+                    }
+                } catch (err) {
+                    console.error("Submission Error:", err);
+                    alert("System Critical: Check Ngrok server routing pipeline.");
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = "SAVE ENFORCER & ISSUE ID";
+                }
+            }, 800);
+        }
+
+        function downloadQR() {
+            const canvas = document.querySelector('#qr-display canvas');
+            const link = document.createElement('a');
+            link.download = `ENFORCER-KEY-${tempEnforcerData.badge_no}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+    </script>
+</body>
+</html>

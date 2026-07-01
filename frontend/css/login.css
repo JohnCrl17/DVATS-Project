@@ -1,0 +1,241 @@
+/* --- Global & Background --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --lto-blue: #0046ad;
+    --lto-blue-dark: #003380;
+    --lto-red: #e60000;
+}
+
+body.login-page {
+    /* Fixed overlay to be slightly darker for better text contrast */
+    background: linear-gradient(rgba(10, 30, 50, 0.85), rgba(10, 20, 30, 0.92)), 
+                url('../assets/image/lto-bg2.jpg'); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Inter', sans-serif;
+    color: white;
+    overflow: hidden; /* Prevents unwanted scrolling/bars */
+}
+
+/* --- The Glass Card --- */
+.login-wrapper {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+}
+
+.login-card {
+    background: rgba(255, 255, 255, 0.1); /* Slightly more opaque glass */
+    backdrop-filter: blur(25px); /* Stronger premium blur */
+    -webkit-backdrop-filter: blur(25px);
+    padding: 45px 40px;
+    border-radius: 28px; /* Softer, modern corners */
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.45);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.lto-logo {
+    width: 110px;
+    height: auto;
+    filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.2));
+}
+
+/* --- Modern Glass Inputs & Icons --- */
+.form-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: left;
+    display: block;
+}
+
+/* Fix for the "Weird" input look: Group styling */
+.input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.input-group i {
+    position: absolute;
+    left: 15px;
+    color: rgba(255, 255, 255, 0.5);
+    z-index: 5;
+    pointer-events: none;
+}
+
+.form-control {
+    background: rgba(255, 255, 255, 0.07) !important; /* Semi-transparent */
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    padding: 14px 15px 14px 45px !important; /* Space for the left icon */
+    border-radius: 12px !important;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: var(--lto-blue) !important;
+    box-shadow: 0 0 20px rgba(0, 70, 173, 0.3);
+    outline: none;
+}
+
+/* Eye Icon / Password Toggle Refinement */
+.input-group .btn-toggle {
+    position: absolute;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    z-index: 5;
+    padding: 5px;
+    transition: color 0.2s ease;
+}
+
+.input-group .btn-toggle:hover {
+    color: white;
+}
+
+/* --- Satisfying Sign In Button --- */
+/* Ensure the button has a solid background and shadow */
+.btn-primary {
+    background-color: #0046ad !important; /* Forces the blue background */
+    border: none !important;
+    border-radius: 12px !important; /* Matches input rounding */
+    color: white !important;
+    padding: 14px !important;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    box-shadow: 0 8px 20px rgba(0, 70, 173, 0.4); /* Makes it "pop" */
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #003380 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(0, 70, 173, 0.6);
+}
+
+/* Fix Placeholder transparency and size */
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.4) !important;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+/* --- Back to Home Navigation --- */
+.back-navigation {
+    margin-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    color: white;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+.btn-back i {
+    transition: transform 0.3s ease;
+}
+
+.btn-back:hover i {
+    transform: translateX(-5px);
+}
+
+/* --- Shake Animation --- */
+.shake-animation {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Container to hold input and icons together */
+.glass-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Left Icon (Lock/Envelope) */
+.input-icon-left {
+    position: absolute;
+    left: 15px;
+    color: rgba(255, 255, 255, 0.5);
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* The Input Field itself */
+.form-control-glass {
+    background: rgba(255, 255, 255, 0.07) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+    padding: 12px 45px 12px 45px !important; /* Equal padding for both icons */
+    border-radius: 12px !important;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+/* The Eye Button */
+.toggle-password-btn {
+    position: absolute;
+    right: 15px;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    z-index: 5;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s ease;
+}
+
+.toggle-password-btn:hover {
+    color: white;
+}
+
+/* Placeholder refinement */
+.form-control-glass::placeholder {
+    font-size: 0.85rem !important;
+    color: rgba(255, 255, 255, 0.3) !important;
+}

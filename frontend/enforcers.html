@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LTO ADMIN | Enforcer Registry</title>
+    <link rel="icon" type="image/png" href="assets/image/logo-5.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sidebar-transition { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        #sidebar { background-color: #00A36C; color: #1e293b; z-index: 50; }
+        .collapsed { width: 85px !important; }
+        .main-expanded { margin-left: 85px !important; }
+        .nav-item {
+            display: flex; align-items: center; gap: 1.25rem;
+            padding: 0.8rem 1.5rem !important; border-radius: 12px !important;
+            transition: all 0.2s ease; margin: 0.5rem 1rem;
+            color: #334155; font-weight: 600; text-decoration: none !important;
+        }
+        .active-nav { background-color: white !important; color: #00A36C !important; font-weight: 800; }
+        .collapsed nav { padding-left: 0 !important; padding-right: 0 !important; }
+        .collapsed .nav-item {
+            margin: 8px 0 8px 15px !important;
+            width: 70px !important; height: 55px !important;
+            padding: 0 !important; justify-content: center !important;
+            border-radius: 20px 0 0 20px !important;
+        }
+        .collapsed .active-nav { width: 70px !important; margin-left: 15px !important; }
+        .collapsed .nav-item i { font-size: 1.5rem !important; margin: 0 !important; }
+        .collapsed .link-text, .collapsed .brand-name, .collapsed .admin-only p { display: none !important; }
+        .glass-card {
+            background: white; border-radius: 2.5rem;
+            box-shadow: 0 20px 50px -12px rgba(0,0,0,0.04);
+            border: 1px solid rgba(0,0,0,0.01);
+        }
+        .mini-stat-card {
+            background: white; border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02);
+            border: 1px solid rgba(0,0,0,0.02);
+        }
+        .logout-link:hover { background-color: #fee2e2 !important; color: #dc2626 !important; }
+        .collapsed .logout-link { margin: 8px 0 8px 15px !important; width: 70px !important; height: 55px !important; justify-content: center !important; border-radius: 20px 0 0 20px !important; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 overflow-x-hidden">
+
+<div class="flex min-h-screen">
+
+    <aside id="sidebar" class="sidebar-transition fixed inset-y-0 left-0 z-50 w-64 shadow-2xl overflow-hidden">
+        <div class="flex flex-col h-full">
+            <div class="p-6 border-b border-black/5 flex items-center justify-between">
+                <button id="sidebarToggle" class="flex items-center gap-3 w-full hover:bg-black/5 p-2 rounded-xl transition-all outline-none">
+                    <i class="bi bi-list text-3xl text-slate-800"></i>
+                    <span class="brand-name font-black tracking-tighter text-xl uppercase italic whitespace-nowrap text-slate-900">Dasma Admin</span>
+                </button>
+            </div>
+            <nav class="flex-1 px-4 py-6 flex flex-col justify-start overflow-y-auto">
+                <div id="navContainer" class="space-y-2">
+                    <a href="dashboard.html" class="nav-item"><i class="bi bi-grid-1x2-fill"></i><span class="link-text">Dashboard</span></a>
+                    <a href="clients.html"   class="nav-item"><i class="bi bi-people-fill"></i><span class="link-text">Violators</span></a>
+                    <a href="violations.html" class="nav-item"><i class="bi bi-exclamation-octagon-fill"></i><span class="link-text">Violations</span></a>
+                    <a href="master_violations.html" class="nav-item">
+                        <i class="bi-car-front-fill"></i>
+                        <span class="link-text text-md">City ORD</span>
+                    </a>
+                    <a href="appointments.html" class="nav-item"><i class="bi bi-calendar-week-fill"></i><span class="link-text">Appointments</span></a>
+                    <a href="enforcers.html" class="nav-item active-nav"><i class="bi bi-shield-lock-fill"></i><span class="link-text">Enforcers</span></a>
+                    <div class="admin-only pt-4 border-t border-black/10 mt-4">
+                        <p class="link-text px-4 text-xs font-bold text-slate-600 uppercase tracking-widest mb-2">System</p>
+                        <a href="settings.html" class="nav-item"><i class="bi bi-gear-fill"></i><span class="link-text">Settings</span></a>
+                    </div>
+                </div>
+            </nav>
+            <div class="p-4 mt-auto border-t border-black/5">
+                <a href="#" class="nav-item logout-link text-red-600">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span class="link-text uppercase text-xs font-bold">Logout</span>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <main id="mainContent" class="flex-1 ml-64 sidebar-transition h-screen flex flex-col bg-slate-50 overflow-hidden">
+
+        <header class="bg-white px-10 h-[100px] flex items-center justify-between border-b border-slate-100 flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-1.5 bg-emerald-500 rounded-full"></div>
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tighter uppercase italic mb-0">Enforcer Registry</h2>
+                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em]">Mobile App Users</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="biometrics.html"
+                   class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm">
+                    <i class="bi bi-plus-lg"></i> Enroll Enforcer
+                </a>
+                <div class="text-right">
+                    <p class="text-[10px] font-black text-green-600 uppercase tracking-[0.2em] mb-1">Standard Time</p>
+                    <div id="pst-time" class="text-[13px] font-black text-slate-700 font-mono bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">--:--:-- --</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 p-10 overflow-y-auto space-y-6">
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="mini-stat-card p-6 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Enforcers</p>
+                        <h3 id="statTotal" class="text-2xl font-black text-slate-800 font-mono">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-500 text-xl">
+                        <i class="bi bi-shield-shaded"></i>
+                    </div>
+                </div>
+                <div class="mini-stat-card p-6 flex items-center justify-between border-l-4 border-l-emerald-500">
+                    <div>
+                        <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">Active Duty</p>
+                        <h3 id="statActive" class="text-2xl font-black text-slate-800 font-mono">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500 text-xl">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                </div>
+                <div class="mini-stat-card p-6 flex items-center justify-between border-l-4 border-l-amber-500">
+                    <div>
+                        <p class="text-[10px] font-bold text-amber-600 uppercase tracking-widest mb-1">Pending Validation</p>
+                        <h3 id="statPending" class="text-2xl font-black text-slate-800 font-mono">0</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 text-xl">
+                        <i class="bi bi-shield-exclamation"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="glass-card flex flex-col h-[calc(100vh-320px)] min-h-[450px] overflow-hidden">
+
+                <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-center bg-slate-50/40 gap-4 flex-shrink-0">
+                    <div class="flex bg-slate-100 p-1.5 rounded-2xl gap-1 w-full sm:w-auto">
+                        <button onclick="filterByStatus('all')"     id="tab-all"     class="px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all bg-white text-emerald-600 shadow-sm">All</button>
+                        <button onclick="filterByStatus('active')"  id="tab-active"  class="px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all text-slate-500 hover:text-slate-800">Active</button>
+                        <button onclick="filterByStatus('pending')" id="tab-pending" class="px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all text-slate-500 hover:text-slate-800">Pending</button>
+                    </div>
+                    <div class="relative w-full sm:w-80">
+                        <i class="bi bi-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="enforcerSearch" placeholder="Search by name, badge, unit..."
+                            class="w-full pl-11 pr-4 py-2.5 bg-white rounded-xl text-xs font-bold text-slate-700 border-2 border-slate-100 focus:border-emerald-500 outline-none transition-all shadow-inner">
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="sticky top-0 bg-white shadow-sm z-10 border-b border-slate-100">
+                            <tr class="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                <th class="px-8 py-5">Officer</th>
+                                <th class="px-8 py-5">Badge No.</th>
+                                <th class="px-8 py-5">Email</th>
+                                <th class="px-8 py-5">District</th>
+                                <th class="px-8 py-5">Unit</th>
+                                <th class="px-8 py-5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="enforcerTableBody" class="divide-y divide-slate-50 font-bold text-[13px] text-slate-600">
+                            <tr>
+                                <td colspan="6" class="py-24 text-center text-slate-400 italic font-medium">
+                                    <div class="flex flex-col items-center gap-3">
+                                        <i class="bi bi-hourglass-split text-3xl text-slate-300"></i>
+                                        <span class="text-xs uppercase tracking-widest font-black">Loading records...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ── VIEW MODAL ── -->
+<!-- ── VIEW MODAL ── -->
+<div id="viewModalOverlay" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm">
+    <div class="bg-white w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl">
+
+        <!-- Header -->
+        <div class="relative h-28 bg-gradient-to-r from-emerald-600 to-emerald-400 flex items-end px-8 pb-4">
+            <div class="flex items-end gap-5 w-full">
+                <!-- Avatar -->
+                <div class="relative flex-shrink-0 -mb-10">
+                    <img id="view-face" src="" alt="Face"
+                        class="w-24 h-24 rounded-2xl object-cover border-4 border-white shadow-xl">
+                    <div class="absolute -bottom-2 -right-2 bg-emerald-500 border-2 border-white text-white px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider flex items-center gap-1">
+                        <i class="bi bi-patch-check-fill"></i> VERIFIED
+                    </div>
+                </div>
+                <!-- Name in header -->
+                <div class="mb-2 flex-1 min-w-0">
+                    <h4 id="view-name" class="text-white font-black text-xl uppercase leading-tight truncate">---</h4>
+                    <p id="view-badge" class="text-emerald-100 text-xs font-bold tracking-widest">---</p>
+                </div>
+                <!-- Status + Close -->
+                <div class="flex items-center gap-3 mb-2 flex-shrink-0">
+                    <span id="view-status" class="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-white/20 text-white border border-white/30">---</span>
+                    <button onclick="closeModal()"
+                        class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all text-white">
+                        <i class="bi bi-x-lg text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="pt-14 px-8 pb-8">
+
+            <!-- Info Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                        <i class="bi bi-shield-fill me-1 text-emerald-400"></i>Assigned Unit
+                    </p>
+                    <p id="view-unit" class="text-sm font-black text-slate-800">---</p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                        <i class="bi bi-person-fill me-1 text-emerald-400"></i>Gender
+                    </p>
+                    <p id="view-gender" class="text-sm font-black text-slate-800">---</p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                        <i class="bi bi-cake2-fill me-1 text-emerald-400"></i>Date of Birth
+                    </p>
+                    <p id="view-dob" class="text-sm font-black text-slate-800">---</p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                        <i class="bi bi-phone-fill me-1 text-emerald-400"></i>Mobile Number
+                    </p>
+                    <p id="view-phone" class="text-sm font-black text-slate-800">---</p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 col-span-2">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                        <i class="bi bi-envelope-fill me-1 text-emerald-400"></i>Email Address
+                    </p>
+                    <p id="view-email" class="text-sm font-black text-slate-800">---</p>
+                </div>
+            </div>
+
+            <!-- QR Section -->
+            <div class="border-t border-slate-100 pt-5 flex items-center justify-between">
+                <div>
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Terminal QR Key</p>
+                    <p class="text-xs text-slate-500 font-medium">Used for enforcer identity verification</p>
+                </div>
+                <button id="btnShowQR" onclick="showQRModal()"
+                    class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm"
+                    style="display:none;">
+                    <i class="bi bi-qr-code"></i> Show QR Token
+                </button>
+                <img id="view-qr" src="" alt="QR" style="display:none;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── DELETE MODAL ── -->
+<div id="deleteModalOverlay" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+        <div class="px-6 py-8 text-center">
+            <div class="w-16 h-16 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                <i class="bi bi-trash text-red-500 text-2xl"></i>
+            </div>
+            <h3 class="text-slate-800 font-black text-lg">Delete Enforcer?</h3>
+            <p class="text-slate-400 text-sm font-semibold mt-2">This action cannot be undone. Are you sure?</p>
+        </div>
+        <div class="px-6 pb-6 flex gap-3">
+            <button onclick="closeDeleteModal()" class="flex-1 py-3 rounded-2xl border-2 border-slate-100 text-slate-400 font-black text-sm hover:bg-slate-50 transition-all">Cancel</button>
+            <button onclick="confirmDelete()"    class="flex-1 py-3 rounded-2xl bg-red-500 text-white font-black text-sm hover:bg-red-600 transition-all flex items-center justify-center gap-2">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="js/Iosalert.js"></script>
+<script src="js/enforcers.js"></script>
+<!-- ── QR LIGHTBOX MODAL ── -->
+<div id="qrLightbox" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden w-full max-w-sm">
+
+        <!-- Header -->
+        <div class="bg-emerald-600 px-6 py-4 flex justify-between items-center">
+            <div>
+                <p class="text-emerald-100 text-[10px] font-bold uppercase tracking-widest">Terminal QR Key</p>
+                <h3 id="qrLightboxName" class="text-white font-black text-sm uppercase"></h3>
+            </div>
+            <button onclick="closeQRModal()"
+                class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-all">
+                <i class="bi bi-x text-white text-lg"></i>
+            </button>
+        </div>
+
+        <!-- QR Image -->
+        <div class="p-8 flex flex-col items-center gap-4">
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4">
+                <img id="qrLightboxImg" src="" alt="QR Code"
+                    class="w-52 h-52 object-contain">
+            </div>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">
+                Scan to verify enforcer identity
+            </p>
+
+            <!-- Download button -->
+            <button onclick="downloadQR()"
+                class="flex items-center gap-2 bg-slate-900 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all w-full justify-center">
+                <i class="bi bi-download"></i> Download QR Token
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function showQRModal() {
+    const qrSrc  = document.getElementById('view-qr').src;
+    const name   = document.getElementById('view-name').innerText;
+
+    if (!qrSrc) {
+        IosAlert.alert('No QR Token', 'This enforcer has no QR token on record.');
+        return;
+    }
+
+    document.getElementById('qrLightboxImg').src  = qrSrc;
+    document.getElementById('qrLightboxName').innerText = name;
+    document.getElementById('qrLightbox').classList.remove('hidden');
+}
+
+function closeQRModal() {
+    document.getElementById('qrLightbox').classList.add('hidden');
+}
+
+function downloadQR() {
+    const img  = document.getElementById('qrLightboxImg');
+    const name = document.getElementById('qrLightboxName').innerText;
+    const link = document.createElement('a');
+    link.href     = img.src;
+    link.download = `QR-TOKEN-${name.replace(/\s/g, '-')}.png`;
+    link.click();
+}
+
+// Close kapag nag-click sa labas
+document.getElementById('qrLightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeQRModal();
+});
+</script>
+</body>
+</html>
