@@ -1,21 +1,19 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "db.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.1",
     "cors": "^2.8.5",
     "express": "^5.2.1",
-    "mysql2": "^3.16.0"
+    "express-session": "^1.19.0",
+    "mysql2": "^3.16.0",
+    "qrcode": "^1.5.4"
   }
 }
