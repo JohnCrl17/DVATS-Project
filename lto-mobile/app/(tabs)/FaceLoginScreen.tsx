@@ -14,7 +14,8 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import { IosAlert } from './CustomAlert';
 
 // ─── CONFIG ────────────────────────────────────────────────────────────────
-const API_BASE_URL     = "https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api";
+// ✅ FIXED: Using Render URL instead of Ngrok
+const API_BASE_URL = "https://dvats-api-php.onrender.com";
 const MAX_RETRIES      = 3;
 const FETCH_TIMEOUT_MS = 60000;
 // ───────────────────────────────────────────────────────────────────────────
@@ -219,14 +220,14 @@ export default function FaceLoginScreen() {
 
   const sendToBackend = async (base64: string, badge: string) => {
     try {
+      // ✅ FIXED: Removed ngrok-skip-browser-warning header
       const response = await fetchWithTimeout(
         `${API_BASE_URL}/face_login.php`,
         {
           method:  "POST",
           headers: {
-            "Content-Type":               "application/json",
-            "Accept":                     "application/json",
-            "ngrok-skip-browser-warning": "true",
+            "Content-Type": "application/json",
+            "Accept":       "application/json",
           },
           body: JSON.stringify({ badge_number: badge, selfie: base64 }),
         },

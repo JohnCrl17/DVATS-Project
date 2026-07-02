@@ -179,7 +179,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const response = await fetch(
-        'https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/login.php',
+        'https://dvats-api-php.onrender.com/login.php',
         {
           method:  'POST',
           headers: {

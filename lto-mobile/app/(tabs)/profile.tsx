@@ -22,6 +22,9 @@ import { IosAlert }                 from './CustomAlert';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 
+// ✅ FIXED: Use Render URL instead of Ngrok
+const API_BASE = 'https://dvats-api-php.onrender.com';
+
 // ─────────────────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────────────────
@@ -170,13 +173,12 @@ export default function ProfileScreen() {
   const [infoVisible,       setInfoVisible]       = useState(false);
   const [securityVisible,   setSecurityVisible]   = useState(false);
   const [qrVisible,         setQrVisible]         = useState(false);
-  const [biometricVisible,  setBiometricVisible]  = useState(false);  // ← ADDED
+  const [biometricVisible,  setBiometricVisible]  = useState(false);
   const [newPassword,       setNewPassword]       = useState('');
   const [updating,          setUpdating]          = useState(false);
-  // Dagdag sa states mo sa taas
-const [oldPassword, setOldPassword] = useState('');
-const [showOld, setShowOld] = useState(false);
-const [showNew, setShowNew] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
 
   // ── Biometric status derived from officer data
   const hasFingerprint = !!(officer?.has_fingerprint);
@@ -193,10 +195,10 @@ const [showNew, setShowNew] = useState(false);
               name:             user.full_name        || 'OFFICER',
               badge_number:     user.badge_number     || 'N/A',
               unit:             user.unit             || 'N/A',
-              profile_pic:      user.profile_pic,
+              profile_pic: user.face_token || user.profile_pic,
               email:            user.email            || 'officer@dasma.gov.ph',
-              has_fingerprint:  user.has_fingerprint,   // ← ADDED
-              has_facial:       user.has_facial,         // ← ADDED
+              has_fingerprint:  user.has_fingerprint,
+              has_facial:       user.has_facial,
             });
           }
         } catch (e) {
@@ -214,18 +216,18 @@ const [showNew, setShowNew] = useState(false);
 
     setUpdating(true);
     try {
+        // ✅ FIXED: Using API_BASE
         const response = await fetch(
-            'https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/update_password.php',
+            `${API_BASE}/update_password.php`,
             {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json', 
-                    'Accept': 'application/json', 
-                    'ngrok-skip-browser-warning': 'true' 
+                    'Accept': 'application/json',
                 },
                 body: JSON.stringify({ 
                     badge_number: officer.badge_number, 
-                    old_password: oldPassword,  // ← DAGDAG
+                    old_password: oldPassword,
                     new_password: newPassword 
                 }),
             }
@@ -244,9 +246,9 @@ const [showNew, setShowNew] = useState(false);
     } finally {
         setUpdating(false);
     }
-};
+  };
 
-  const handleChangePhoto = async () => {
+const handleChangePhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       IosAlert.alert('Permission Required', 'Please allow access to your photo library.');
@@ -277,20 +279,20 @@ const [showNew, setShowNew] = useState(false);
 
     setUpdating(true);
     try {
-      const controller = new AbortController();              // ✅ dineclare na
+      const controller = new AbortController();
       const timeoutId  = setTimeout(() => controller.abort(), 30000);
 
       const response = await fetch(
-        'https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/update_profile_pic.php',
+        `${API_BASE}/update_profile_pic.php`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': 'true',
           },
+          // ✅ FIXED: Send face_token instead of profile_pic
           body: JSON.stringify({
             badge_number: officer?.badge_number,
-            profile_pic:  manipResult.base64,
+            face_token:   manipResult.base64,
           }),
           signal: controller.signal,
         }
@@ -301,7 +303,7 @@ const [showNew, setShowNew] = useState(false);
       const text = await response.text();
       console.log('Raw response:', text);
 
-      const result2 = JSON.parse(text);                     // ✅ parse once lang
+      const result2 = JSON.parse(text);
 
       if (result2.status === 'success') {
         setOfficer(prev => prev ? { ...prev, profile_pic: manipResult.base64! } : prev);
@@ -310,6 +312,7 @@ const [showNew, setShowNew] = useState(false);
         if (session) {
           const user = JSON.parse(session);
           user.profile_pic = manipResult.base64;
+          user.face_token = manipResult.base64;
           await AsyncStorage.setItem('userSession', JSON.stringify(user));
         }
 
@@ -343,7 +346,7 @@ const [showNew, setShowNew] = useState(false);
               await AsyncStorage.removeItem('userSession');
               setTimeout(() => {
                 router.replace({ pathname: '/' });
-              }, 250); // ← hintayin muna mag-close ang alert modal
+              }, 250);
             } catch (e) {
               console.log('Logout Error:', e);
             }
@@ -443,7 +446,7 @@ const [showNew, setShowNew] = useState(false);
             iconBg="#f0fdf4"
             iconColor="#22c55e"
             label="Biometric Auth"
-            onPress={() => setBiometricVisible(true)}   // ← FIXED: hindi na blangko
+            onPress={() => setBiometricVisible(true)}
           />
         </View>
 
@@ -771,21 +774,20 @@ const styles = StyleSheet.create({
     marginLeft:      66,
   },
 
-  // Dagdag sa loob ng StyleSheet.create:
-cameraBtn: {
-  position:        'absolute',
-  bottom:          0,
-  right:           0,
-  width:           28,
-  height:          28,
-  borderRadius:    14,
-  backgroundColor: '#007aff',
-  alignItems:      'center',
-  justifyContent:  'center',
-  borderWidth:     2.5,
-  borderColor:     'white',
-  elevation:       4,
-},
+  cameraBtn: {
+    position:        'absolute',
+    bottom:          0,
+    right:           0,
+    width:           28,
+    height:          28,
+    borderRadius:    14,
+    backgroundColor: '#007aff',
+    alignItems:      'center',
+    justifyContent:  'center',
+    borderWidth:     2.5,
+    borderColor:     'white',
+    elevation:       4,
+  },
 
   // ── version
   version: { textAlign: 'center', fontSize: 11, color: '#cbd5e1', marginTop: 8 },
@@ -848,19 +850,19 @@ cameraBtn: {
     fontSize: 11, fontWeight: '600', 
     color: '#94a3b8', marginBottom: 6, 
     letterSpacing: 0.3, textTransform: 'uppercase' 
-},
-inputWrap: {
+  },
+  inputWrap: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: '#f8fafc',
     borderWidth: 1, borderColor: '#e2e8f0',
     borderRadius: 12, paddingHorizontal: 16,
-},
-inputInner: {
+  },
+  inputInner: {
     flex: 1, paddingVertical: 14,
     fontSize: 16, fontWeight: '600',
     color: '#1e293b', letterSpacing: 4,
-},
-eyeBtn: { 
+  },
+  eyeBtn: { 
     padding: 4 
-},
+  },
 });

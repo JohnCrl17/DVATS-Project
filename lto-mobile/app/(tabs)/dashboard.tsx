@@ -17,6 +17,9 @@ import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAudioPlayer } from 'expo-audio';
 
+// ✅ FIXED: Use Render URL instead of Ngrok
+const API_BASE = 'https://dvats-api-php.onrender.com';
+
 interface Officer {
   name: string;
   badge_number: string;
@@ -32,7 +35,7 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [shiftStart] = useState(new Date()); // nag-start nung nag-load ang dashboard
+  const [shiftStart] = useState(new Date());
   const [shiftDuration, setShiftDuration] = useState('00:00:00');
   const [todayTickets, setTodayTickets] = useState(0);
 
@@ -80,15 +83,16 @@ export default function DashboardScreen() {
           profile_pic: user.profile_pic,
         });
 
+        // ✅ FIXED: All Ngrok URLs replaced with API_BASE
         const [statsRes, activityRes, alertsRes] = await Promise.all([
-          fetch(`https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/get_stats.php?badge_number=${badge}`, {
-            headers: { 'ngrok-skip-browser-warning': 'true', Accept: 'application/json' },
+          fetch(`${API_BASE}/get_stats.php?badge_number=${badge}`, {
+            headers: { Accept: 'application/json' },
           }),
-          fetch(`https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/get_apprehensions.php?badge_number=${badge}`, {
-            headers: { 'ngrok-skip-browser-warning': 'true', Accept: 'application/json' },
+          fetch(`${API_BASE}/get_apprehensions.php?badge_number=${badge}`, {
+            headers: { Accept: 'application/json' },
           }),
-          fetch(`https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/get_alerts.php?badge_number=${badge}`, {
-            headers: { 'ngrok-skip-browser-warning': 'true', Accept: 'application/json' },
+          fetch(`${API_BASE}/get_alerts.php?badge_number=${badge}`, {
+            headers: { Accept: 'application/json' },
           }),
         ]);
 

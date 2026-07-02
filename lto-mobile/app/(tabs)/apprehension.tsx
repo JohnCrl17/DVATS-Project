@@ -16,7 +16,8 @@ import * as ImagePicker          from 'expo-image-picker';
 import { Image }                 from 'react-native';
 import { IosAlert }              from './CustomAlert';
 
-const API_BASE_URL = 'https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api';
+// ✅ FIXED: Use Render URL instead of Ngrok
+const API_BASE_URL = 'https://dvats-api-php.onrender.com';
 
 interface MasterViolation {
   id: string;
@@ -131,12 +132,12 @@ export default function ApprehensionScreen() {
   useEffect(() => {
     const fetchViolations = async () => {
       try {
+        // ✅ FIXED: Using API_BASE_URL
         const url = `${API_BASE_URL}/master_violations_api.php?action=read`;
         console.log('Fetching violations from:', url);
         
         const response = await fetch(url, {
           headers: {
-            'ngrok-skip-browser-warning': 'true',
             'Accept': 'application/json'
           }
         });
@@ -194,9 +195,10 @@ export default function ApprehensionScreen() {
 
   const uploadPhoto = async (base64: string, type: 'violation' | 'proof'): Promise<string | null> => {
     try {
+      // ✅ FIXED: Using API_BASE_URL
       const res = await fetch(`${API_BASE_URL}/upload_photo.php`, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+        headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ image: base64, type }),
       });
       const result = await res.json();
@@ -215,9 +217,10 @@ export default function ApprehensionScreen() {
         photoUri, [{ resize: { width: 400 } }],
         { base64: true, compress: 0.5, format: ImageManipulator.SaveFormat.JPEG }
       );
+      // ✅ FIXED: Using API_BASE_URL
       const res = await fetch(`${API_BASE_URL}/face_login.php`, {
         method:  'POST',
-        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+        headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ badge_number: enforcerBadge, selfie: manipResult.base64 }),
       });
       const result = await res.json();
@@ -352,7 +355,8 @@ export default function ApprehensionScreen() {
   useEffect(() => {
     const getSupervisorPin = async () => {
       try {
-        const res  = await fetch(`${API_BASE_URL}/get_supervisor_pin.php`, { headers: { 'ngrok-skip-browser-warning': 'true' } });
+        // ✅ FIXED: Using API_BASE_URL
+        const res  = await fetch(`${API_BASE_URL}/get_supervisor_pin.php`);
         const data = await res.json();
         if (data.status === 'success') setSupervisorPin(data.pin);
       } catch (err) { console.error('PIN fetch error:', err); }
@@ -391,7 +395,8 @@ export default function ApprehensionScreen() {
   const searchDatabase = async (licenseToSearch: string, ocrName: string | null = null): Promise<void> => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/search_driver.php?license_no=${encodeURIComponent(licenseToSearch)}`, { headers: { 'ngrok-skip-browser-warning': 'true' } });
+      // ✅ FIXED: Using API_BASE_URL
+      const response = await fetch(`${API_BASE_URL}/search_driver.php?license_no=${encodeURIComponent(licenseToSearch)}`);
       const text = await response.text();
       if (!text.trim().startsWith('{')) throw new Error('Invalid JSON: ' + text);
       const result = JSON.parse(text);
@@ -412,7 +417,6 @@ export default function ApprehensionScreen() {
           setDriverName(cleanOcrName || licenseToSearch);
           setLicenseNo(licenseToSearch);
           setIsDriverRegistered(false);
-          // Force camera remount
           setIsCameraActive(false);
           setCameraKey(prev => prev + 1);
           setCurrentStep(3);
@@ -571,11 +575,13 @@ export default function ApprehensionScreen() {
       proof_type:       proofType          || '',
     };
     try {
-      const response   = await fetch(`${API_BASE_URL}/add_violation.php`, { method: 'POST', headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' }, body: JSON.stringify(payload) });
+      // ✅ FIXED: Using API_BASE_URL
+      const response   = await fetch(`${API_BASE_URL}/add_violation.php`, { method: 'POST', headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       const jsonResult = await response.json();
       if (jsonResult.status === 'success') {
         if (!isDriverRegistered && driverEmail) {
           try {
+            // ✅ FIXED: Using API_BASE_URL
             await fetch(`${API_BASE_URL}/send_registration.php`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -592,8 +598,10 @@ export default function ApprehensionScreen() {
         if (!isDriverRegistered && driverPhone) {
           const formattedPhone = driverPhone.startsWith('0') ? '+63' + driverPhone.slice(1) : driverPhone;
           try {
-            const smsMessage = `OFFICIAL NOTICE: LTO Dasmariñas. Ticket No: ${jsonResult.ticket_no}. License: ${licenseNo}. Total Fine: ₱${totalFine}. Settle at https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/driver-portal/index.html - DVATS`;
-            await fetch(`${API_BASE_URL}/send_sms.php`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' }, body: JSON.stringify({ number: formattedPhone, message: smsMessage }) });
+            // ✅ FIXED: Updated SMS link to Render URL
+            const smsMessage = `OFFICIAL NOTICE: LTO Dasmariñas. Ticket No: ${jsonResult.ticket_no}. License: ${licenseNo}. Total Fine: ₱${totalFine}. Settle at https://dvats-api-php.onrender.com/dvats_api/driver-portal/index.html - DVATS`;
+            // ✅ FIXED: Using API_BASE_URL
+            await fetch(`${API_BASE_URL}/send_sms.php`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ number: formattedPhone, message: smsMessage }) });
           } catch (smsErr) { console.error('SMS Error:', smsErr); }
         }
         IosAlert.alert('Ticket Issued', 'Ticket and notifications sent successfully.', [{
@@ -609,7 +617,6 @@ export default function ApprehensionScreen() {
   };
 
   const totalPenalty = selectedViolations.reduce((sum, v) => {
-    // Gamitin yung penalty based sa offense level
     if (offenseLevel === 'first') return sum + Number(v.first_offense || 0);
     if (offenseLevel === 'second') return sum + Number(v.second_offense || 0);
     if (offenseLevel === 'third') return sum + Number(v.third_offense || 0);

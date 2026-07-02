@@ -18,6 +18,9 @@ import { LinearGradient }           from 'expo-linear-gradient';
 import { useRouter, useFocusEffect } from 'expo-router';
 import AsyncStorage                 from '@react-native-async-storage/async-storage';
 
+// ✅ FIXED: Use Render URL instead of Ngrok
+const API_BASE = 'https://dvats-api-php.onrender.com';
+
 // ─────────────────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────────────────
@@ -255,11 +258,11 @@ export default function HistoryScreen() {
           badge_number: user.badge_number || '',
         });
 
+        // ✅ FIXED: Using API_BASE instead of Ngrok URL
         const response = await fetch(
-          `https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/get_history.php?badge_number=${user.badge_number}`,
+          `${API_BASE}/get_history.php?badge_number=${user.badge_number}`,
           {
             headers: {
-              'ngrok-skip-browser-warning': 'true',
               'Accept': 'application/json',
             },
           }
@@ -371,7 +374,7 @@ export default function HistoryScreen() {
 // ─────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   // ── layout
-  container:   { flex: 1, backgroundColor: '#f2f2f7' },   // iOS system grouped bg
+  container:   { flex: 1, backgroundColor: '#f2f2f7' },
 
   // ── header
   header: {

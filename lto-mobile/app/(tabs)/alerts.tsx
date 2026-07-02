@@ -19,6 +19,9 @@ import { IosAlert }                  from './CustomAlert';
 import Swipeable             from 'react-native-gesture-handler/Swipeable';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+// ✅ FIXED: Use Render URL instead of Ngrok
+const API_BASE = 'https://dvats-api-php.onrender.com';
+
 // ─────────────────────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────────────────────
@@ -69,11 +72,10 @@ export default function AlertsScreen() {
       if (!sessionData) return;
 
       const user = JSON.parse(sessionData);
-      const url  = `https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/get_alerts.php?badge_number=${user.badge_number}`;
+      // ✅ FIXED: Using API_BASE
+      const url  = `${API_BASE}/get_alerts.php?badge_number=${user.badge_number}`;
 
-      const response = await fetch(url, {
-        headers: { 'ngrok-skip-browser-warning': 'true' },
-      });
+      const response = await fetch(url);
       const result = await response.json();
       if (result.status === 'success') setNotifications(result.data || []);
     } catch (e) {
@@ -90,10 +92,8 @@ export default function AlertsScreen() {
   const markAsRead = async (id: string | number) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: 1 } : n));
     try {
-      await fetch(
-        `https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/mark_read.php?id=${id}`,
-        { headers: { 'ngrok-skip-browser-warning': 'true' } }
-      );
+      // ✅ FIXED: Using API_BASE
+      await fetch(`${API_BASE}/mark_read.php?id=${id}`);
     } catch (e) { console.log('Mark read error:', e); }
   };
 
@@ -103,10 +103,8 @@ export default function AlertsScreen() {
       if (!sessionData) return;
       const user = JSON.parse(sessionData);
       setNotifications(prev => prev.map(n => ({ ...n, is_read: 1 })));
-      await fetch(
-        `https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/mark_all_read.php?badge_number=${user.badge_number}`,
-        { headers: { 'ngrok-skip-browser-warning': 'true' } }
-      );
+      // ✅ FIXED: Using API_BASE
+      await fetch(`${API_BASE}/mark_all_read.php?badge_number=${user.badge_number}`);
     } catch (e) { console.log('Mark all read error:', e); }
   };
 
@@ -122,10 +120,8 @@ export default function AlertsScreen() {
           onPress: async () => {
             setNotifications(prev => prev.filter(n => n.id !== id));
             try {
-              await fetch(
-                `https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/delete_notification.php?id=${id}`,
-                { headers: { 'ngrok-skip-browser-warning': 'true' } }
-              );
+              // ✅ FIXED: Using API_BASE
+              await fetch(`${API_BASE}/delete_notification.php?id=${id}`);
             } catch (e) { console.log('Delete error:', e); }
           },
         },

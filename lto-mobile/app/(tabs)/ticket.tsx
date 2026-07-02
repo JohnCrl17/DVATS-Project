@@ -47,7 +47,7 @@ export default function TicketScreen() {
     db_id: params.ticket_id || params.id || "" 
   };
 
-  const API_BASE_URL = "https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api";
+  const API_BASE_URL = "https://dvats-api-php.onrender.com";
 
   useEffect(() => {
     const fetchStatus = async () => {
