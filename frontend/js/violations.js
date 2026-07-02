@@ -396,20 +396,18 @@ function closeSettleModal() {
 
 async function confirmSettle() {
     if (!currentSettleId) return;
-
     const idToSettle = currentSettleId;
     closeSettleModal();
 
     try {
-        // ✅ FIXED: PUT method with ID in URL
-        const response = await fetch(`${API_BASE_URL}/web-violations/pay/${idToSettle}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+        // ✅ FIXED: POST method with ID in body
+        const response = await fetch(`${API_BASE_URL}/web-violations/pay`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: idToSettle })
         });
         const result = await response.json();
-        if (result.success) {
+        if (result.status === 'success') {
             showViolationToast("✅ Violation settled successfully!");
             loadViolations();
         } else {
