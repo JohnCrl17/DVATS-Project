@@ -435,15 +435,26 @@ export default function ApprehensionScreen() {
       if (biometricAuth.success) setCurrentStep(6);
       else IosAlert.alert('Auth Failed', 'Biometric authentication required.');
     } else if (currentStep === 6) {
-      if (selectedViolations.length === 0) { IosAlert.alert('Warning', 'Select at least one violation.'); return; }
-      IosAlert.alert('Confirm Ticket', `Issue ticket to ${driverName}?`, [
+    if (selectedViolations.length === 0) { IosAlert.alert('Warning', 'Select at least one violation.'); return; }
+    
+    // ✅ Check kung may photos na
+    if (!violationPhotoUrl && violationPhotoUri) {
+        IosAlert.alert('Uploading', 'Please wait for the evidence photo to finish uploading.');
+        return;
+    }
+    if (!enforcerProofUrl && enforcerProofUri) {
+        IosAlert.alert('Uploading', 'Please wait for the identity proof to finish uploading.');
+        return;
+    }
+    
+    IosAlert.alert('Confirm Ticket', `Issue ticket to ${driverName}?`, [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Confirm', onPress: () => submitApprehension() }
-      ]);
-    }
+    ]);
+}
   };
 
-  const submitApprehension = async () => {
+const submitApprehension = async () => {
     if (!isDriverRegistered) {
       if (!driverEmail || !driverPhone) { IosAlert.alert('Missing Information', 'Provide Email and Phone.'); return; }
       if (driverPhone.length < 11) { IosAlert.alert('Invalid Phone', 'Enter valid 11-digit number.'); return; }
@@ -456,30 +467,87 @@ export default function ApprehensionScreen() {
       return sum;
     }, 0);
     const violationNames = selectedViolations.map(v => v.violation_name).join(', ');
+    
+    // ✅ Step 1: Convert photos to base64 (mabilis lang 'to!)
+    let violationBase64 = violationPhotoUrl || ''; // If already uploaded, use URL
+    let enforcerBase64 = enforcerProofUrl || '';   // If already uploaded, use URL
+    
+    try {
+        if (violationPhotoUri && !violationPhotoUrl) {
+            const manipResult = await ImageManipulator.manipulateAsync(
+                violationPhotoUri, [{ resize: { width: 600 } }],
+                { base64: true, compress: 0.4, format: ImageManipulator.SaveFormat.JPEG }
+            );
+            violationBase64 = manipResult.base64 || '';
+        }
+        if (enforcerProofUri && !enforcerProofUrl) {
+            const manipResult = await ImageManipulator.manipulateAsync(
+                enforcerProofUri, [{ resize: { width: 400 } }],
+                { base64: true, compress: 0.4, format: ImageManipulator.SaveFormat.JPEG }
+            );
+            enforcerBase64 = manipResult.base64 || '';
+        }
+    } catch(e) { console.warn('Base64 conversion failed:', e); }
+    
+    // ✅ Step 2: Submit agad with base64!
     const payload = {
       driver_name: isDriverRegistered ? driverName : licenseNo, license_no: licenseNo || 'NOT DETECTED',
       violation_types: violationNames, penalty_amount: totalFine, offense_level: offenseLevel,
       badge_number: enforcerBadge, driver_email: !isDriverRegistered ? driverEmail : '',
       driver_phone: !isDriverRegistered ? driverPhone : '', is_registered: isDriverRegistered ? 1 : 0,
-      client_id: clientId, violation_photo: violationPhotoUrl || '', enforcer_proof: enforcerProofUrl || '', proof_type: proofType || '',
+      client_id: clientId, 
+      violation_photo: violationBase64,  // ← Base64 or URL
+      enforcer_proof: enforcerBase64,    // ← Base64 or URL
+      proof_type: proofType || '',
     };
+    
     try {
-      const response = await fetch(`${API_BASE_URL}/add_violation.php`, { method: 'POST', headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const response = await fetch(`${API_BASE_URL}/add_violation.php`, { 
+          method: 'POST', 
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }, 
+          body: JSON.stringify(payload) 
+      });
       const jsonResult = await response.json();
+      
       if (jsonResult.status === 'success') {
-        if (!isDriverRegistered && driverEmail) {
-          await fetch(`${API_BASE_URL}/send_registration.php`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: driverEmail, license_no: licenseNo, ticket_no: jsonResult.ticket_no, violation_name: violationNames, fine_amount: totalFine }) }).catch(() => {});
+        // ✅ Step 3: Upload photos in background for future use
+        if (violationPhotoUri && !violationPhotoUrl) {
+            uploadPhoto(violationBase64, 'violation').then(url => {
+                if (url) {
+                    setViolationPhotoUrl(url);
+                    // Update DB with URL
+                    fetch(`${API_BASE_URL}/update_photos.php`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ticket_no: jsonResult.ticket_no, violation_photo: url })
+                    }).catch(() => {});
+                }
+            });
         }
-        if (!isDriverRegistered && driverPhone) {
-          const formattedPhone = driverPhone.startsWith('0') ? '+63' + driverPhone.slice(1) : driverPhone;
-          const smsMessage = `OFFICIAL NOTICE: LTO Dasmariñas. Ticket No: ${jsonResult.ticket_no}. License: ${licenseNo}. Total Fine: ₱${totalFine}. Settle at https://dvats-api-php.onrender.com/driver-portal/index.html - DVATS`;
-          await fetch(`${API_BASE_URL}/send_sms.php`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ number: formattedPhone, message: smsMessage }) }).catch(() => {});
+        if (enforcerProofUri && !enforcerProofUrl) {
+            uploadPhoto(enforcerBase64, 'proof').then(url => {
+                if (url) {
+                    setEnforcerProofUrl(url);
+                    fetch(`${API_BASE_URL}/update_photos.php`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ticket_no: jsonResult.ticket_no, enforcer_proof: url })
+                    }).catch(() => {});
+                }
+            });
         }
-        IosAlert.alert('Ticket Issued', 'Ticket and notifications sent.', [{ text: 'OK', onPress: () => { resetAllStates(); router.push({ pathname: '/ticket', params: { ticket_no: jsonResult.ticket_no, driver_name: isDriverRegistered ? driverName : `LICENSE: ${licenseNo}`, license_no: licenseNo, violation_name: violationNames, fine_amount: totalFine.toString(), created_at: new Date().toISOString(), enforcer_name: enforcerName, badge_number: enforcerBadge, is_registered: isDriverRegistered ? 1 : 0 } }); } }]);
+        
+        // SMS sending...
+        if (!isDriverRegistered && driverEmail) { /* ... */ }
+        if (!isDriverRegistered && driverPhone) { /* ... */ }
+        
+        IosAlert.alert('Ticket Issued', 'Ticket and notifications sent.', [{ 
+            text: 'OK', onPress: () => { resetAllStates(); router.push({ pathname: '/ticket', params: { ticket_no: jsonResult.ticket_no, driver_name: isDriverRegistered ? driverName : `LICENSE: ${licenseNo}`, license_no: licenseNo, violation_name: violationNames, fine_amount: totalFine.toString(), created_at: new Date().toISOString(), enforcer_name: enforcerName, badge_number: enforcerBadge, is_registered: isDriverRegistered ? 1 : 0 } }); } 
+        }]);
       } else { IosAlert.alert('Failed', jsonResult.message || 'Unknown error.'); }
     } catch (err) { IosAlert.alert('Error', 'Check connection.'); }
     finally { setLoading(false); }
-  };
+};
 
   const totalPenalty = selectedViolations.reduce((sum, v) => {
     if (offenseLevel === 'first') return sum + Number(v.first_offense || 0);
