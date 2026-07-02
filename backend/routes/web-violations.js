@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const path = require('path');   // ✅ DAGDAG
+const path = require('path');
 const fs = require('fs');
 
 // 1. Get All Violations
@@ -53,23 +53,75 @@ router.post('/pay', async (req, res) => {
     }
 });
 
+// ✅ FIXED: Serve Image Route (converted from PHP logic)
 router.get('/serve-image', (req, res) => {
     const imagePath = req.query.path;
-    
+
     if (!imagePath) {
-        return res.status(400).send('No path provided');
+        res.setHeader('Content-Type', 'image/svg+xml');
+        return res.send('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#f1f5f9" width="200" height="200"/><text x="100" y="105" text-anchor="middle" fill="#94a3b8" font-size="16">No image</text></svg>');
     }
 
-    // Construct full path (adjust mo kung iba yung upload folder mo)
-    const fullPath = path.join(__dirname, '..', 'uploads', imagePath.replace(/\\/g, '/'));
+    // Decode URL-encoded path
+    const decodedPath = decodeURIComponent(imagePath);
     
-    // Check if file exists
-    if (fs.existsSync(fullPath)) {
-        res.sendFile(fullPath);
+    // Extract filename
+    const filename = path.basename(decodedPath);
+    
+    // Determine which folder based on path
+    let filePath;
+    const uploadsDir = path.join(__dirname, '..', 'uploads');
+    
+    if (decodedPath.includes('violation')) {
+        filePath = path.join(uploadsDir, 'violation', filename);
+    } else if (decodedPath.includes('proof')) {
+        filePath = path.join(uploadsDir, 'proof', filename);
     } else {
-        console.error('Image not found:', fullPath);
-        res.status(404).send('Image not found');
+        // Try common folders first
+        if (fs.existsSync(path.join(uploadsDir, 'violation', filename))) {
+            filePath = path.join(uploadsDir, 'violation', filename);
+        } else if (fs.existsSync(path.join(uploadsDir, 'proof', filename))) {
+            filePath = path.join(uploadsDir, 'proof', filename);
+        } else {
+            filePath = path.join(uploadsDir, filename);
+        }
     }
+
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+        console.error('❌ Image not found:', filePath);
+        res.setHeader('Content-Type', 'image/svg+xml');
+        res.setHeader('Cache-Control', 'no-cache');
+        return res.send(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#fef2f2" width="200" height="200"/><text x="100" y="95" text-anchor="middle" fill="#ef4444" font-size="14">File not found</text><text x="100" y="115" text-anchor="middle" fill="#94a3b8" font-size="10">${filename}</text></svg>`);
+    }
+
+    // Determine MIME type
+    const ext = path.extname(filePath).toLowerCase();
+    const mimeTypes = {
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.png': 'image/png',
+        '.gif': 'image/gif',
+        '.webp': 'image/webp',
+        '.bmp': 'image/bmp'
+    };
+    const mimeType = mimeTypes[ext] || 'application/octet-stream';
+
+    // Set headers
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
+    // Send file
+    res.sendFile(filePath, (err) => {
+        if (err) {
+            console.error('❌ Error sending file:', err);
+            if (!res.headersSent) {
+                res.status(500).send('Error serving image');
+            }
+        }
+    });
 });
 
 module.exports = router;
