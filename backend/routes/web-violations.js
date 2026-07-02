@@ -7,8 +7,15 @@ module.exports = function(db, dvats_db) {
     const router = express.Router();
 
     // 1. Get All Violations
-    router.get('/all', (req, res) => {
-        const sql = `SELECT * FROM violations WHERE id IN (SELECT MAX(id) FROM violations GROUP BY COALESCE(ticket_no, id)) ORDER BY created_at DESC`;
+     router.get('/all', (req, res) => {
+        const sql = `SELECT id, ticket_no, license_no, badge_number, driver_name, violation_name, 
+                     fine_amount, penalty_amount, status, is_registered, client_id, 
+                     proof_type, created_at, updated_at,
+                     CASE WHEN violation_photo IS NOT NULL AND violation_photo != '' THEN 1 ELSE 0 END as has_violation_photo,
+                     CASE WHEN enforcer_proof IS NOT NULL AND enforcer_proof != '' THEN 1 ELSE 0 END as has_enforcer_proof
+                     FROM violations 
+                     WHERE id IN (SELECT MAX(id) FROM violations GROUP BY COALESCE(ticket_no, id)) 
+                     ORDER BY created_at DESC`;
         db.query(sql, (err, results) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(results);

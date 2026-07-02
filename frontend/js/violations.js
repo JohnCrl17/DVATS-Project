@@ -115,27 +115,23 @@ async function loadViolations() {
 
             let evidenceHTML = '<div class="flex items-center gap-2">';
 
-            if (hasViolationPhoto) {
+            if (v.has_violation_photo) {
                 evidenceHTML += `
-                    <button class="vphoto-btn w-12 h-12 rounded-xl bg-slate-200 overflow-hidden border-2 border-slate-300 hover:border-red-400 transition-all flex-shrink-0 relative group"
-                        data-url="${getImageUrl(v.violation_photo)}"
-                        data-title="Violation Evidence"
-                        data-label="Ticket #${escapeHtml(v.ticket_no || String(violationId))}">
-                        <img src="${getImageUrl(v.violation_photo)}" class="w-full h-full object-cover">
+                    <button class="w-12 h-12 rounded-xl bg-green-50 flex items-center justify-center border border-green-200 hover:bg-green-100 transition-all"
+                        onclick="viewViolationImage(${v.id}, 'violation')" title="View Evidence">
+                        <i class="bi bi-camera-fill text-green-600 text-lg"></i>
                     </button>`;
             }
 
-            if (hasEnforcerProof) {
+            if (v.has_enforcer_proof) {
                 evidenceHTML += `
-                    <button class="vphoto-btn w-12 h-12 rounded-xl bg-slate-200 overflow-hidden border-2 border-slate-300 hover:border-blue-400 transition-all flex-shrink-0 relative group"
-                        data-url="${getImageUrl(v.enforcer_proof)}"
-                        data-title="Enforcer Proof"
-                        data-label="${escapeHtml(v.proof_type || 'Manual')}">
-                        <img src="${getImageUrl(v.enforcer_proof)}" class="w-full h-full object-cover">
+                    <button class="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center border border-blue-200 hover:bg-blue-100 transition-all"
+                        onclick="viewViolationImage(${v.id}, 'proof')" title="View Enforcer Proof">
+                        <i class="bi bi-person-badge-fill text-blue-600 text-lg"></i>
                     </button>`;
             }
 
-            if (!hasViolationPhoto && !hasEnforcerProof) {
+            if (!v.has_violation_photo && !v.has_enforcer_proof) {
                 evidenceHTML += `
                     <div class="w-12 h-12 rounded-xl bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center">
                         <i class="bi bi-camera-off text-slate-300 text-lg"></i>
