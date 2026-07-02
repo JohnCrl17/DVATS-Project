@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../db');
 
 // 1. Get All Violations
-router.get('/get_violations', (req, res) => {
+router.get('/all', (req, res) => {
     const sql = `SELECT * FROM violations WHERE id IN (SELECT MAX(id) FROM violations GROUP BY COALESCE(ticket_no, id)) ORDER BY created_at DESC`;
     db.query(sql, (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -12,7 +12,7 @@ router.get('/get_violations', (req, res) => {
 });
 
 // 2. Add Violation (Kambal Sync Logic)
-router.post('/add_violation', async (req, res) => {
+router.post('/add', async (req, res) => {
     const { driver_name, license_no, violation_types, penalty_amount, badge_number, violation_photo, enforcer_proof, proof_type } = req.body;
     const ticket_no = "DVATS-" + Math.random().toString(36).substr(2, 6).toUpperCase();
 
@@ -36,7 +36,7 @@ router.post('/add_violation', async (req, res) => {
 });
 
 // 3. Settle Violation (Update both)
-router.post('/settle_violation', async (req, res) => {
+router.post('/pay', async (req, res) => {
     const { id } = req.body;
     try {
         const row = await new Promise((resolve) => db.query("SELECT ticket_no FROM violations WHERE id = ?", [id], (e, r) => resolve(r[0])));

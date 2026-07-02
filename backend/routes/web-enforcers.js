@@ -2,15 +2,15 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-// 1. GET ALL ENFORCERS (dating get_enforcer.php)
-router.get('/all', (req, res) => {
+// 1. GET ALL ENFORCERS
+router.get('/list', (req, res) => {
     db.query("SELECT id, full_name, badge_number, email, unit, status FROM enforcers ORDER BY id DESC", (err, results) => {
         if (err) return res.status(500).json([]);
         res.json(results);
     });
 });
 
-// 2. GET ENFORCER DETAILS (dating get_enforcer_details.php)
+// 2. GET ENFORCER DETAILS
 router.get('/details', (req, res) => {
     const { id } = req.query;
     db.query(`SELECT id, full_name, badge_number, email, unit, gender, dob, phone_number, status, 
@@ -21,8 +21,8 @@ router.get('/details', (req, res) => {
     });
 });
 
-// 3. UPDATE STATUS (dating POST logic sa get_enforcer.php)
-router.post('/update_status', (req, res) => {
+// 3. UPDATE STATUS
+router.post('/update-status', (req, res) => {
     const { id, status } = req.body;
     db.query("UPDATE enforcers SET status = ? WHERE id = ?", [status, id], (err, result) => {
         if (err) return res.json({ success: false, message: err.message });
@@ -30,7 +30,7 @@ router.post('/update_status', (req, res) => {
     });
 });
 
-// 4. DELETE ENFORCER (dating delete_enforcer.php)
+// 4. DELETE ENFORCER
 router.post('/delete', (req, res) => {
     const { id } = req.body;
     db.query("DELETE FROM enforcers WHERE id = ?", [id], (err, result) => {

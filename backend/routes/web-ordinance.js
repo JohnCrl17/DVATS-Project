@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../db');
 
 // READ ALL
-router.get('/read', (req, res) => {
+router.get('/list', (req, res) => {
     db.query("SELECT * FROM master_violations ORDER BY created_at DESC", (err, results) => {
         if (err) return res.status(500).json({ status: 'error', message: err.message });
         res.json({ status: 'success', data: results });
