@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadClients() {
     try {
         // Fetch clients list
-        const response = await fetch(`${API_BASE_URL}/web-clients/list`, {
+        const response = await fetch(`${API_BASE_URL}/api/web-clients/list`, {
             headers: { 'Content-Type': 'application/json' }
         });
         
@@ -77,10 +77,10 @@ async function viewClient(id) {
 
     try {
         const [clientRes, historyRes] = await Promise.all([
-            fetch(`${API_BASE_URL}/web-clients/details?id=${id}`, {
+            fetch(`${API_BASE_URL}/api/web-clients/details?id=${id}`, {
                 headers: { 'Content-Type': 'application/json' }
             }),
-            fetch(`${API_BASE_URL}/web-clients/history?id=${id}`, {
+            fetch(`${API_BASE_URL}/api/web-clients/history?id=${id}`, {
                 headers: { 'Content-Type': 'application/json' }
             }).catch(() => null)
         ]);
@@ -165,7 +165,7 @@ async function confirmSendSMS() {
   if (!msg) return;
   closeSMSModal();
   try {
-    const res = await fetch(`${API_BASE_URL}/web-clients/send-sms`, {
+    const res = await fetch(`${API_BASE_URL}/api/web-clients/send-sms`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json'
@@ -200,7 +200,7 @@ async function confirmDelete() {
     if (!currentDeleteId) return;
     closeDeleteModal();
     try {
-        const response = await fetch(`${API_BASE_URL}/web-clients/delete`, {
+        const response = await fetch(`${API_BASE_URL}/api/web-clients/delete`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json' 

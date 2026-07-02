@@ -11,7 +11,7 @@ function getImageUrl(originalUrl) {
         path = parts.length > 1 ? parts[1] : path;
     }
     path = path.replace(/^\//, '');
-    return `${API_BASE_URL}/web-violations/serve-image?path=${encodeURIComponent(path)}`;
+    return `${API_BASE_URL}/api/web-violations/serve-image?path=${encodeURIComponent(path)}`;
 }
 
 async function fetchImageAsBlob(url) {
@@ -72,7 +72,7 @@ async function loadViolations() {
     if (!tbody) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/web-violations/list`, {
+        const response = await fetch(`${API_BASE_URL}/api/web-violations/list`, {
             headers: { 'Content-Type': 'application/json' }
         });
         const data = await response.json();
@@ -306,7 +306,7 @@ async function loadClientDropdown() {
     if (!select) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/web-clients/list`, {
+        const response = await fetch(`${API_BASE_URL}/api/web-clients/list`, {
             headers: { 'Content-Type': 'application/json' }
         });
         const clients = await response.json();
@@ -339,7 +339,7 @@ async function saveViolation() {
     btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Processing...`;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/web-violations/add`, {
+        const response = await fetch(`${API_BASE_URL}/api/web-violations/add`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -398,7 +398,7 @@ async function confirmSettle() {
     closeSettleModal();
 
     try {
-        const response = await fetch(`${API_BASE_URL}/web-violations/settle`, {
+        const response = await fetch(`${API_BASE_URL}/api/web-violations/settle`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

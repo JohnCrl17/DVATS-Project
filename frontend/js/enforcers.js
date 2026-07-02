@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ─── FETCH ALL ENFORCERS ──────────────────────────────────────
 async function fetchEnforcers() {
     try {
-        const response = await fetch(`${API_BASE_URL}/web-enforcers/list`, {
+        const response = await fetch(`${API_BASE_URL}/api/web-enforcers/list`, {
             headers: { 'Content-Type': 'application/json' }
         });
 
@@ -158,7 +158,7 @@ async function viewEnforcer(id) {
     if (!id) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/web-enforcers/details?id=${id}`, {
+        const response = await fetch(`${API_BASE_URL}/api/web-enforcers/details?id=${id}`, {
             headers: { 'Content-Type': 'application/json' }
         });
 
@@ -221,7 +221,7 @@ async function toggleStatus(id, currentStatus) {
 
     try {
         // Siguraduhin na tama ang endpoint sa backend mo
-        const response = await fetch(`${API_BASE_URL}/web-enforcers/update-status`, {
+        const response = await fetch(`${API_BASE_URL}/api/web-enforcers/update-status`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -268,7 +268,7 @@ async function confirmDelete() {
     closeDeleteModal();
 
     try {
-        const response = await fetch(`${API_BASE_URL}/web-enforcers/delete`, {
+        const response = await fetch(`${API_BASE_URL}/api/web-enforcers/delete`, {
             method: 'POST', // Mas safe gamitin ang POST para sa delete operations sa karamihan ng setups
             headers: { 
                 'Content-Type': 'application/json' 
