@@ -1,494 +1,9 @@
-/**
- * LTO Appointments Management System
- * Full JS Implementation
- */
-
-// ─────────────────────────────────────────────────────────────
-// ALERT SYSTEM — Modern Minimalist
-// ─────────────────────────────────────────────────────────────
-
-const Alert = (() => {
-  // Inject styles once
-  const injectStyles = () => {
-    if (document.getElementById('alert-styles')) return;
-    const style = document.createElement('style');
-    style.id = 'alert-styles';
-    style.textContent = `
-      @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
-
-      .alert-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 99999;
-        background: rgba(15, 23, 42, 0.45);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
-        animation: alertFadeIn 0.18s ease;
-      }
-
-      @keyframes alertFadeIn {
-        from { opacity: 0; }
-        to   { opacity: 1; }
-      }
-
-      @keyframes alertSlideUp {
-        from { opacity: 0; transform: translateY(12px) scale(0.98); }
-        to   { opacity: 1; transform: translateY(0)    scale(1);    }
-      }
-
-      @keyframes alertSlideOut {
-        from { opacity: 1; transform: translateY(0)   scale(1);    }
-        to   { opacity: 0; transform: translateY(8px) scale(0.97); }
-      }
-
-      .alert-box {
-        background: #ffffff;
-        border-radius: 20px;
-        width: 100%;
-        max-width: 360px;
-        overflow: hidden;
-        box-shadow:
-          0 0 0 1px rgba(15,23,42,0.06),
-          0 8px 24px rgba(15,23,42,0.10),
-          0 32px 64px rgba(15,23,42,0.08);
-        font-family: 'DM Sans', sans-serif;
-        animation: alertSlideUp 0.22s cubic-bezier(0.34,1.3,0.64,1);
-      }
-
-      .alert-box.closing {
-        animation: alertSlideOut 0.18s ease forwards;
-      }
-
-      .alert-body {
-        padding: 28px 24px 20px;
-        text-align: center;
-      }
-
-      .alert-icon {
-        width: 52px;
-        height: 52px;
-        border-radius: 16px;
-        margin: 0 auto 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .alert-icon.success { background: #f0fdf4; }
-      .alert-icon.error   { background: #fef2f2; }
-      .alert-icon.warning { background: #fffbeb; }
-      .alert-icon.info    { background: #eff6ff; }
-
-      .alert-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: #0f172a;
-        margin: 0 0 6px;
-        letter-spacing: -0.3px;
-        line-height: 1.3;
-      }
-
-      .alert-message {
-        font-size: 13px;
-        color: #64748b;
-        margin: 0;
-        font-weight: 500;
-        line-height: 1.55;
-      }
-
-      .alert-actions {
-        border-top: 1px solid #f1f5f9;
-        display: flex;
-      }
-
-      .alert-btn {
-        flex: 1;
-        padding: 16px;
-        border: none;
-        background: none;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        font-family: 'DM Sans', sans-serif;
-        transition: background 0.15s ease;
-        letter-spacing: -0.1px;
-      }
-
-      .alert-btn:hover { background: #f8fafc; }
-      .alert-btn:active { background: #f1f5f9; }
-
-      .alert-btn + .alert-btn {
-        border-left: 1px solid #f1f5f9;
-      }
-
-      .alert-btn.cancel  { color: #94a3b8; }
-      .alert-btn.confirm { color: #0f172a; }
-      .alert-btn.danger  { color: #ef4444; }
-      .alert-btn.primary { color: #007aff; }
-
-      /* Toast styles */
-      .alert-toast-wrap {
-        position: fixed;
-        top: 24px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 99999;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
-        pointer-events: none;
-      }
-
-      .alert-toast {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 18px;
-        border-radius: 100px;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 13px;
-        font-weight: 600;
-        box-shadow: 0 4px 20px rgba(15,23,42,0.12), 0 0 0 1px rgba(15,23,42,0.05);
-        animation: toastIn 0.28s cubic-bezier(0.34,1.4,0.64,1);
-        letter-spacing: -0.1px;
-        pointer-events: auto;
-        white-space: nowrap;
-      }
-
-      @keyframes toastIn {
-        from { opacity: 0; transform: translateY(-10px) scale(0.95); }
-        to   { opacity: 1; transform: translateY(0)     scale(1);    }
-      }
-
-      @keyframes toastOut {
-        from { opacity: 1; transform: translateY(0)    scale(1);    }
-        to   { opacity: 0; transform: translateY(-8px) scale(0.96); }
-      }
-
-      .alert-toast.hiding {
-        animation: toastOut 0.2s ease forwards;
-      }
-
-      .alert-toast.success { background: #0f172a; color: #ffffff; }
-      .alert-toast.error   { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-      .alert-toast.warning { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; }
-      .alert-toast.info    { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
-    `;
-    document.head.appendChild(style);
-  };
-
-  // Close helper with animation
-  const closeBox = (overlay, box, resolve, value) => {
-    box.classList.add('closing');
-    setTimeout(() => { overlay.remove(); if (resolve) resolve(value); }, 160);
-  };
-
-  // ── Toast (auto-dismiss, no buttons)
-  const toast = (message, type = 'success', duration = 2800) => {
-    injectStyles();
-
-    let wrap = document.getElementById('alert-toast-wrap');
-    if (!wrap) {
-      wrap = document.createElement('div');
-      wrap.id = 'alert-toast-wrap';
-      wrap.className = 'alert-toast-wrap';
-      document.body.appendChild(wrap);
-    }
-
-    const icons = {
-      success: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
-      error:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
-      warning: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
-      info:    `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
-    };
-
-    const t = document.createElement('div');
-    t.className = `alert-toast ${type}`;
-    t.innerHTML = `${icons[type] || ''}<span>${message}</span>`;
-    wrap.appendChild(t);
-
-    setTimeout(() => {
-      t.classList.add('hiding');
-      setTimeout(() => t.remove(), 200);
-    }, duration);
-  };
-
-  // ── Alert (single OK button)
-  const alert = (title, message, type = 'info') => {
-    injectStyles();
-
-    const icons = {
-      success: { svg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>` },
-      error:   { svg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>` },
-      warning: { svg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>` },
-      info:    { svg: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>` },
-    };
-
-    return new Promise(resolve => {
-      const overlay = document.createElement('div');
-      overlay.className = 'alert-overlay';
-      overlay.innerHTML = `
-        <div class="alert-box">
-          <div class="alert-body">
-            <div class="alert-icon ${type}">${icons[type]?.svg || ''}</div>
-            <p class="alert-title">${title}</p>
-            ${message ? `<p class="alert-message">${message}</p>` : ''}
-          </div>
-          <div class="alert-actions">
-            <button class="alert-btn primary" id="alertOk">OK</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(overlay);
-
-      const box = overlay.querySelector('.alert-box');
-      overlay.querySelector('#alertOk').onclick = () => closeBox(overlay, box, resolve, true);
-      overlay.addEventListener('click', e => { if (e.target === overlay) closeBox(overlay, box, resolve, true); });
-    });
-  };
-
-  // ── Confirm (two buttons, returns boolean)
-  const confirm = (title, message, opts = {}) => {
-    injectStyles();
-
-    const {
-      confirmText  = 'Confirm',
-      cancelText   = 'Cancel',
-      confirmStyle = 'danger',   // 'danger' | 'primary'
-      icon         = 'warning',
-    } = opts;
-
-    const icons = {
-      warning: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
-      danger:  `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
-      info:    `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
-    };
-
-    return new Promise(resolve => {
-      const overlay = document.createElement('div');
-      overlay.className = 'alert-overlay';
-      overlay.innerHTML = `
-        <div class="alert-box">
-          <div class="alert-body">
-            <div class="alert-icon ${icon === 'danger' ? 'error' : 'warning'}">${icons[icon] || icons.warning}</div>
-            <p class="alert-title">${title}</p>
-            ${message ? `<p class="alert-message">${message}</p>` : ''}
-          </div>
-          <div class="alert-actions">
-            <button class="alert-btn cancel"  id="alertCancel">${cancelText}</button>
-            <button class="alert-btn ${confirmStyle}" id="alertConfirm">${confirmText}</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(overlay);
-
-      const box = overlay.querySelector('.alert-box');
-      overlay.querySelector('#alertCancel').onclick  = () => closeBox(overlay, box, resolve, false);
-      overlay.querySelector('#alertConfirm').onclick = () => closeBox(overlay, box, resolve, true);
-      overlay.addEventListener('click', e => { if (e.target === overlay) closeBox(overlay, box, resolve, false); });
-    });
-  };
-
-  return { toast, alert, confirm };
-})();
-
-
-// ─────────────────────────────────────────────────────────────
-// SEMAPHORE SMS
-// ─────────────────────────────────────────────────────────────
-
-const SMS = (() => {
-
-  // Gamitin ang existing send_sms.php — API key naka-store na doon
-  const send = async (number, message) => {
-    const res = await fetch(`${API_BASE_URL}/web-appointments/send-sms`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ number, message }),
-    });
-    
-    const data = await res.json();
-    if (!data.success) throw new Error(data.error || data.message || 'SMS failed');
-    return data;
-};
-
-  // Show SMS preview modal — returns Promise<boolean>
-  const preview = (recipientName, phoneNumber, message) => {
-    // Inject extra styles if needed
-    const styleId = 'sms-preview-styles';
-    if (!document.getElementById(styleId)) {
-      const s = document.createElement('style');
-      s.id = styleId;
-      s.textContent = `
-        .sms-preview-box {
-          background: #ffffff;
-          border-radius: 20px;
-          width: 100%;
-          max-width: 400px;
-          overflow: hidden;
-          box-shadow:
-            0 0 0 1px rgba(15,23,42,0.06),
-            0 8px 24px rgba(15,23,42,0.10),
-            0 32px 64px rgba(15,23,42,0.08);
-          font-family: 'DM Sans', sans-serif;
-          animation: alertSlideUp 0.22s cubic-bezier(0.34,1.3,0.64,1);
-        }
-        .sms-preview-header {
-          padding: 24px 24px 0;
-          display: flex;
-          align-items: flex-start;
-          gap: 14px;
-        }
-        .sms-preview-icon {
-          width: 44px; height: 44px;
-          border-radius: 14px;
-          background: #f0fdf4;
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0;
-        }
-        .sms-preview-meta { flex: 1; }
-        .sms-preview-title {
-          font-size: 15px; font-weight: 700;
-          color: #0f172a; margin: 0 0 3px;
-          letter-spacing: -0.3px;
-        }
-        .sms-preview-sub {
-          font-size: 12px; color: #94a3b8;
-          font-weight: 500; margin: 0;
-        }
-        .sms-preview-body { padding: 16px 24px 8px; }
-        .sms-preview-bubble-wrap {
-          background: #f8fafc;
-          border-radius: 14px;
-          padding: 14px 16px;
-          border: 1px solid #f1f5f9;
-        }
-        .sms-preview-label {
-          font-size: 10px; font-weight: 700;
-          color: #94a3b8; letter-spacing: 0.6px;
-          text-transform: uppercase; margin-bottom: 8px;
-        }
-        .sms-preview-bubble {
-          background: #0f172a;
-          color: #ffffff;
-          font-size: 13px;
-          font-weight: 500;
-          line-height: 1.6;
-          padding: 12px 14px;
-          border-radius: 12px 12px 12px 3px;
-          margin: 0;
-          letter-spacing: -0.1px;
-        }
-        .sms-preview-chars {
-          text-align: right;
-          font-size: 11px;
-          color: #cbd5e1;
-          font-weight: 500;
-          margin-top: 8px;
-        }
-        .sms-preview-recipient {
-          display: flex; align-items: center; gap: 8px;
-          padding: 10px 24px 16px;
-        }
-        .sms-preview-recipient-label {
-          font-size: 11px; color: #94a3b8; font-weight: 600;
-        }
-        .sms-preview-recipient-pill {
-          display: flex; align-items: center; gap: 5px;
-          background: #eff6ff; border-radius: 100px;
-          padding: 4px 10px 4px 6px;
-        }
-        .sms-preview-recipient-dot {
-          width: 6px; height: 6px; border-radius: 50%;
-          background: #3b82f6;
-        }
-        .sms-preview-recipient-name {
-          font-size: 12px; font-weight: 700; color: #1d4ed8;
-        }
-        .sms-preview-recipient-num {
-          font-size: 11px; color: #93c5fd; font-weight: 500;
-        }
-        .sms-preview-actions {
-          border-top: 1px solid #f1f5f9;
-          display: flex;
-        }
-      `;
-      document.head.appendChild(s);
-    }
-
-    return new Promise(resolve => {
-      const overlay = document.createElement('div');
-      overlay.className = 'alert-overlay';
-
-      const charCount = message.length;
-      const smsCount  = Math.ceil(charCount / 160);
-
-      overlay.innerHTML = `
-        <div class="sms-preview-box">
-          <div class="sms-preview-header">
-            <div class="sms-preview-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              </svg>
-            </div>
-            <div class="sms-preview-meta">
-              <p class="sms-preview-title">Send SMS Notification</p>
-              <p class="sms-preview-sub">via DVATS · Semaphore</p>
-            </div>
-          </div>
-
-          <div class="sms-preview-body">
-            <div class="sms-preview-bubble-wrap">
-              <p class="sms-preview-label">Message Preview</p>
-              <p class="sms-preview-bubble">${message}</p>
-              <p class="sms-preview-chars">${charCount} chars · ${smsCount} SMS credit${smsCount > 1 ? 's' : ''}</p>
-            </div>
-          </div>
-
-          <div class="sms-preview-recipient">
-            <span class="sms-preview-recipient-label">To</span>
-            <div class="sms-preview-recipient-pill">
-              <div class="sms-preview-recipient-dot"></div>
-              <span class="sms-preview-recipient-name">${recipientName}</span>
-              <span class="sms-preview-recipient-num">${phoneNumber}</span>
-            </div>
-          </div>
-
-          <div class="sms-preview-actions">
-            <button class="alert-btn cancel"  id="smsCancel">Skip SMS</button>
-            <button class="alert-btn primary" id="smsSend">Send Now</button>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(overlay);
-
-      const box = overlay.querySelector('.sms-preview-box');
-      const closeBox = (val) => {
-        box.classList.add('closing');
-        setTimeout(() => { overlay.remove(); resolve(val); }, 160);
-      };
-
-      overlay.querySelector('#smsCancel').onclick = () => closeBox(false);
-      overlay.querySelector('#smsSend').onclick   = () => closeBox(true);
-      overlay.addEventListener('click', e => { if (e.target === overlay) closeBox(false); });
-    });
-  };
-
-  return { send, preview };
-})();
-
-
 // ─────────────────────────────────────────────────────────────
 // APPOINTMENTS LOGIC
 // ─────────────────────────────────────────────────────────────
+
+// ✅ DAGDAG: Kailangan ng API_BASE_URL sa taas ng file
+const API_BASE_URL = 'https://dvats-project.onrender.com/api';
 
 document.addEventListener('DOMContentLoaded', () => {
     initSidebar();
@@ -521,7 +36,8 @@ async function fetchAppointments() {
     if (!tableBody) return;
 
     try {
-        const response = await fetch('/api/appointments/all');
+        // ✅ FIXED: Gumamit ng API_BASE_URL
+        const response = await fetch(`${API_BASE_URL}/appointments/all`);
         const results  = await response.json();
 
         if (!results || results.length === 0) {
@@ -591,7 +107,8 @@ async function fetchClientsForDropdown() {
     if (!select) return;
 
     try {
-        const response = await fetch('/api/clients/all');
+        // ✅ FIXED: Gumamit ng API_BASE_URL
+        const response = await fetch(`${API_BASE_URL}/clients/all`);
         const clients  = await response.json();
 
         select.innerHTML = '<option value="" disabled selected>-- Choose Driver --</option>' +
@@ -617,7 +134,6 @@ async function addAppointment() {
     const shouldSendSMS = document.getElementById('sendSmsAppt').checked;
 
     if (!clientId || !date || !time) {
-        // ✅ Modern alert — validation
         await Alert.alert('Missing Details', 'Please select a driver, date, and time before confirming.', 'warning');
         return;
     }
@@ -629,7 +145,8 @@ async function addAppointment() {
     try {
         const combinedDateTime = `${date} ${time}:00`;
 
-        const response = await fetch('/api/appointments/add', {
+        // ✅ FIXED: Gumamit ng API_BASE_URL
+        const response = await fetch(`${API_BASE_URL}/appointments/add`, {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body:    JSON.stringify({
@@ -652,7 +169,6 @@ async function addAppointment() {
                     };
 
                     if (clientData.phone_number) {
-                        // Format date nicely for the SMS message
                         const formattedDate = new Date(`${date} ${time}`).toLocaleDateString('en-PH', {
                             month: 'long', day: 'numeric', year: 'numeric'
                         });
@@ -662,7 +178,6 @@ async function addAppointment() {
 
                         const msg = `APPOINTMENTS NOTICE: Hi ${clientData.fullname}, your appointment for ${purpose} is confirmed on ${formattedDate} at ${formattedTime}. Please bring required documents. Thank you!`;
 
-                        // ✅ Show SMS preview modal — user can confirm or skip
                         const sendSms = await SMS.preview(clientData.fullname, clientData.phone_number, msg);
 
                         if (sendSms) {
@@ -682,19 +197,16 @@ async function addAppointment() {
                 }
             }
 
-            // ✅ Modern toast — success
             Alert.toast('Appointment scheduled successfully', 'success');
             setTimeout(() => location.reload(), 1400);
 
         } else {
-            // ✅ Modern alert — server error
             await Alert.alert('Scheduling Failed', result.message || 'The server could not process this request.', 'error');
             btn.disabled  = false;
             btn.innerHTML = originalText;
         }
     } catch (error) {
         console.error('Critical Error:', error);
-        // ✅ Modern alert — connection error
         await Alert.alert('Connection Error', 'Could not reach the server. Please check your connection and try again.', 'error');
         btn.disabled  = false;
         btn.innerHTML = originalText;
@@ -703,7 +215,6 @@ async function addAppointment() {
 
 // --- 5. DELETE/CANCEL APPOINTMENT ---
 async function deleteAppointment(id) {
-    // ✅ Modern confirm dialog
     const confirmed = await Alert.confirm(
         'Cancel Appointment',
         'Are you sure you want to cancel this appointment? This action cannot be undone.',
@@ -718,9 +229,9 @@ async function deleteAppointment(id) {
     if (!confirmed) return;
 
     try {
-        const response = await fetch(`/api/appointments/${id}`, { method: 'DELETE' });
+        // ✅ FIXED: Gumamit ng API_BASE_URL
+        const response = await fetch(`${API_BASE_URL}/appointments/${id}`, { method: 'DELETE' });
         if (response.ok) {
-            // ✅ Toast on success
             Alert.toast('Appointment cancelled', 'success');
             setTimeout(() => fetchAppointments(), 800);
         } else {

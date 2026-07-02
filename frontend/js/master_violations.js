@@ -108,7 +108,8 @@ async function saveViolation() {
     if (isEdit) payload.id = editId;
 
     try {
-        const endpoint = isEdit ? `${API_BASE_URL}/api/web-ordinance/update` : `${API_BASE_URL}/api/web-ordinance/create`;
+        // ✅ FIXED: Tinanggal extra /api
+        const endpoint = isEdit ? `${API_BASE}/web-ordinance/update` : `${API_BASE}/web-ordinance/create`;
         
         const response = await fetch(endpoint, {
             method: 'POST',
@@ -135,7 +136,8 @@ async function confirmDelete() {
     if (!deleteTargetId) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/web-ordinance/delete`, {
+        // ✅ FIXED: Tinanggal extra /api
+        const response = await fetch(`${API_BASE}/web-ordinance/delete`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: deleteTargetId })
@@ -161,7 +163,8 @@ async function confirmDelete() {
 // ═══════════════════════════════════════════════════════════
 async function loadViolations() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/web-ordinance/list`, {
+        // ✅ FIXED: Tinanggal extra /api
+        const response = await fetch(`${API_BASE}/web-ordinance/list`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' }
         });

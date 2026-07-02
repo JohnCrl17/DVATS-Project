@@ -21,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ─── FETCH ALL ENFORCERS ──────────────────────────────────────
 async function fetchEnforcers() {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/web-enforcers/list`, {
+        // ✅ FIXED: Tinanggal extra /api
+        const response = await fetch(`${API_BASE_URL}/web-enforcers/list`, {
             headers: { 'Content-Type': 'application/json' }
         });
 
@@ -158,7 +159,8 @@ async function viewEnforcer(id) {
     if (!id) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/web-enforcers/details?id=${id}`, {
+        // ✅ FIXED: Tinanggal extra /api
+        const response = await fetch(`${API_BASE_URL}/web-enforcers/details?id=${id}`, {
             headers: { 'Content-Type': 'application/json' }
         });
 
@@ -220,13 +222,12 @@ async function toggleStatus(id, currentStatus) {
     const nextStatus = currentStatus === 'active' ? 'pending' : 'active';
 
     try {
-        // Siguraduhin na tama ang endpoint sa backend mo
-        const response = await fetch(`${API_BASE_URL}/api/web-enforcers/update-status`, {
+        // ✅ FIXED: Tinanggal extra /api
+        const response = await fetch(`${API_BASE_URL}/web-enforcers/update-status`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            // Mas malinis ang JSON kaysa sa manual string concatenation
             body: JSON.stringify({ 
                 id: id, 
                 status: nextStatus 
@@ -236,10 +237,8 @@ async function toggleStatus(id, currentStatus) {
         const result = await response.json();
         
         if (result.success) {
-            // Success! Refresh natin ang table
             fetchEnforcers(); 
         } else {
-            // May error na galing sa server
             alert(result.message || 'Status update failed.');
         }
     } catch (err) {
@@ -261,39 +260,34 @@ function closeDeleteModal() {
 }
 
 async function confirmDelete() {
-    // Siguraduhin na may target ID
     if (!currentDeleteId) return;
 
-    // Isara muna ang modal para hindi ma-click ulit habang nagpa-process
     closeDeleteModal();
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/web-enforcers/delete`, {
-            method: 'POST', // Mas safe gamitin ang POST para sa delete operations sa karamihan ng setups
+        // ✅ FIXED: Tinanggal extra /api
+        const response = await fetch(`${API_BASE_URL}/web-enforcers/delete`, {
+            method: 'POST',
             headers: { 
                 'Content-Type': 'application/json' 
             },
-            // I-pass ang ID sa loob ng body, hindi sa URL
             body: JSON.stringify({ id: currentDeleteId })
         });
 
         const data = await response.json();
 
         if (data.status === 'success') {
-            // Success! Refresh natin ang listahan
             if (typeof IosAlert !== 'undefined') {
                 IosAlert.toast('Enforcer record deleted.');
             }
             fetchEnforcers();
         } else {
-            // Error handling mula sa server
             alert(data.message || 'Delete failed.');
         }
     } catch (err) {
         console.error("Delete error:", err);
         alert('Could not connect to server.');
     } finally {
-        // Reset ng ID para hindi ma-delete ulit nang hindi sinasadya
         currentDeleteId = null;
     }
 }

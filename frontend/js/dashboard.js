@@ -1,7 +1,7 @@
 // ======================
 // 🌐 GLOBAL CONFIG
 // ======================
-const API_BASE_URL = 'https://dvats-project.onrender.com/api';
+const API_BASE_URL = 'https://dvats-project.onrender.com/api';  // ✅ May /api na dito
 const CONFIG = { 
     headers: { 
         'Content-Type': 'application/json',
@@ -57,7 +57,8 @@ async function safeFetch(url) {
 // ======================
 async function loadDashboardStats() {
     try {
-        const stats = await safeFetch(`${API_BASE_URL}/api/web-dashboard/summary`);
+        // ✅ TAMA NA: Tinanggal yung extra /api
+        const stats = await safeFetch(`${API_BASE_URL}/web-dashboard/summary`);
 
         document.getElementById('clientsCount') && (document.getElementById('clientsCount').innerText = stats.totalClients || 0);
         document.getElementById('violationsCount') && (document.getElementById('violationsCount').innerText = stats.totalViolations || 0);
@@ -79,7 +80,8 @@ async function loadRecentActivity() {
     if (!list) return;
 
     try {
-        const activities = await safeFetch(`${API_BASE_URL}/api/web-dashboard/recent-activity`);
+        // ✅ TAMA NA: Tinanggal yung extra /api
+        const activities = await safeFetch(`${API_BASE_URL}/web-dashboard/recent-activity`);
 
         if (!Array.isArray(activities) || activities.length === 0) {
             list.innerHTML = `<tr><td colspan="4" class="text-center py-10 opacity-50 italic">No recent activity found.</td></tr>`;
