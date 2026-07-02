@@ -1,1 +1,5 @@
 node_modules
+MASTER_BACKUP.sql
+MASTER_FINAL.sql
+node_modules/
+.expo/
