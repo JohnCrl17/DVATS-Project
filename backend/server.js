@@ -242,34 +242,30 @@ app.listen(PORT, '0.0.0.0', () => {
 app.put('/api/violations/pay/:id', (req, res) => {
     const violationId = req.params.id;
     
-    // Step 1: Update lto_system.violations (MAIN - dapat ito lang ang required)
-    const sql1 = "UPDATE violations SET status = 'Paid', updated_at = NOW() WHERE id = ?";
-    db.query(sql1, [violationId], (err1, result1) => {
-        if (err1) {
-            console.error("❌ Update Error:", err1.message);
+    // Update lto_system.violations
+    const sql = "UPDATE violations SET status = 'Paid', updated_at = NOW() WHERE id = ?";
+    db.query(sql, [violationId], (err, result) => {
+        if (err) {
+            console.error("❌ Update Error:", err.message);
             return res.status(500).json({ success: false, message: "Database Error" });
         }
         
-        if (result1.affectedRows === 0) {
-            return res.status(404).json({ success: false, message: "Violation not found" });
-        }
-        
-        // ✅ Main DB updated successfully! Return success agad.
+        // Success muna sa main DB
         res.json({ success: true, message: "Fine marked as paid!" });
         
-        // Step 2: Try to sync with dvats_db (OPTIONAL - hindi dapat makaapekto sa main response)
+        // Try to sync dvats_db.apprehensions (optional, async)
         const getTicketSql = "SELECT ticket_no FROM violations WHERE id = ?";
         db.query(getTicketSql, [violationId], (err2, ticketResult) => {
             if (!err2 && ticketResult.length > 0) {
                 const ticket_no = ticketResult[0].ticket_no;
-                const sql2 = "UPDATE apprehensions SET status = 'PAID' WHERE ticket_no = ?";
-                dvats_db.query(sql2, [ticket_no], (err3) => {
-                    if (err3) {
-                        console.warn("⚠️ Mobile DB sync failed (non-critical):", err3.message);
-                    } else {
-                        console.log("✅ Kambal Sync: Ticket " + ticket_no + " PAID in both systems");
+                dvats_db.query(
+                    "UPDATE apprehensions SET status = 'PAID' WHERE ticket_no = ?",
+                    [ticket_no],
+                    (err3) => {
+                        if (err3) console.warn("⚠️ dvats_db sync failed:", err3.message);
+                        else console.log("✅ Synced to dvats_db:", ticket_no);
                     }
-                });
+                );
             }
         });
     });
@@ -588,15 +584,16 @@ app.get('/api/driver/dashboard-data', (req, res) => {
 // Gagawa tayo ng hiwalay na connection string para kay dvats_db dahil magkaiba sila ni lto_system
 // ✅ DITO YUNG FIX: Dynamic connection based on environment
 const dvats_db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME_MOBILE || 'dvats_db',
+    host: process.env.DB_HOST,           // Railway Cloud host
+    user: process.env.DB_USER,           // Railway Cloud user
+    password: process.env.DB_PASSWORD,   // Railway Cloud password
+    database: 'dvats_db',                // Hardcoded na kasi ito lang naman laman
     port: process.env.DB_PORT || 3306
 });
 
 dvats_db.connect((err) => {
-    if (!err) console.log("✅ Mobile Node (dvats_db) Connected");
+    if (!err) console.log("✅ Mobile Node (dvats_db) Connected to Cloud");
+    else console.warn("⚠️ Mobile Node connection failed (non-critical):", err.message);
 });
 
 // ─── STAGE 1: VERIFY BADGE NUMBER & GENERATE SECURE OTP ──────────────────────
