@@ -7,8 +7,15 @@ const axios = require('axios'); // Added for SMS API calls
 const QRCode = require('qrcode');
 
 // Middleware & Auth
+// --- Middleware & Auth ---
 const protect = require('./middleware/authMiddleware');
 const authRoutes = require("./routes/auth");
+const enforcerRoutes = require('./routes/web-enforcers');
+const dashboardRoutes = require('./routes/web-dashboard');
+const clientRoutes = require('./routes/web-clients');
+const violationRoutes = require('./routes/web-violations');
+const ordinanceRoutes = require('./routes/web-ordinance'); // Siguraduhin na ang file ay web-ordinances.js
+const registerRoutes = require('./routes/web-register');
 
 const app = express();
 
@@ -45,6 +52,13 @@ app.use(session({
 
 // 4. Auth Routes
 app.use("/api/auth", authRoutes);
+app.use('/api/web-enforcers', enforcerRoutes);
+app.use('/api/web-dashboard', dashboardRoutes);
+app.use('/api/web-clients', clientRoutes);
+app.use('/api/web-violations', violationRoutes);
+app.use('/api/web-ordinances', ordinanceRoutes);
+app.use('/api/web-register', registerRoutes);
+
 
 // --- 📱 SMS HELPER FUNCTION ---
 // This function handles the logic for sending alerts to clients
