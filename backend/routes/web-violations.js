@@ -101,5 +101,20 @@ module.exports = function(db, dvats_db) {
         }
     });
 
+        // 5. Get single violation image
+    router.get('/image/:id/:type', (req, res) => {
+        const { id, type } = req.params;
+        const column = type === 'violation' ? 'violation_photo' : 'enforcer_proof';
+        
+        const sql = `SELECT ${column} as image FROM violations WHERE id = ?`;
+        db.query(sql, [id], (err, results) => {
+            if (err || results.length === 0) {
+                return res.json({ image: null });
+            }
+            const image = results[0].image;
+            res.json({ image: image || null });
+        });
+    });
+
     return router;
 };

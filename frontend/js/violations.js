@@ -14,6 +14,55 @@ function getImageUrl(originalUrl) {
     return `${API_BASE_URL}/web-violations/serve-image?path=${encodeURIComponent(path)}`;
 }
 
+// ✅ Function to view violation image in modal
+function viewViolationImage(violationId, type) {
+    // Show loading
+    const modal = document.getElementById('imagePreviewModal');
+    const img = document.getElementById('imagePreviewSrc');
+    const spinner = document.getElementById('previewSpinner');
+    const titleEl = document.getElementById('imagePreviewTitle');
+    const labelEl = document.getElementById('imagePreviewLabel');
+    
+    if (!modal || !img) return;
+    
+    titleEl.textContent = type === 'violation' ? 'Violation Evidence' : 'Enforcer Proof';
+    labelEl.textContent = `ID: #${violationId}`;
+    
+    img.style.opacity = '0';
+    if (spinner) spinner.style.display = 'flex';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    // Fetch the image from a separate endpoint
+    fetch(`${API_BASE_URL}/web-violations/image/${violationId}/${type}`, {
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.image) {
+            // Check if it's base64 or URL
+            if (data.image.startsWith('http')) {
+                img.src = data.image;
+            } else {
+                img.src = `data:image/jpeg;base64,${data.image}`;
+            }
+            img.onload = () => {
+                if (spinner) spinner.style.display = 'none';
+                img.style.opacity = '1';
+            };
+        } else {
+            if (spinner) spinner.style.display = 'none';
+            img.src = '';
+            img.style.opacity = '1';
+        }
+    })
+    .catch(() => {
+        if (spinner) spinner.style.display = 'none';
+        img.src = '';
+        img.style.opacity = '1';
+    });
+}
+
 async function fetchImageAsBlob(url) {
     try {
         const res = await fetch(url, { headers: { 'ngrok-skip-browser-warning': 'true' } });
