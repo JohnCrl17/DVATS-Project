@@ -559,16 +559,17 @@ app.get('/api/driver/dashboard-data', (req, res) => {
 // =============================================================================
 
 // Gagawa tayo ng hiwalay na connection string para kay dvats_db dahil magkaiba sila ni lto_system
+// ✅ DITO YUNG FIX: Dynamic connection based on environment
 const dvats_db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME_MOBILE, // Iba ang db name nito
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME_MOBILE || 'dvats_db', // Separate database name
     port: process.env.DB_PORT || 3306
 });
 
 dvats_db.connect((err) => {
-    if (!err) console.log("✅ Mobile Node (dvats_db) Connected to Laragon");
+    if (!err) console.log("✅ Mobile Node (dvats_db) Connected");
 });
 
 // ─── STAGE 1: VERIFY BADGE NUMBER & GENERATE SECURE OTP ──────────────────────
