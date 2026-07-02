@@ -14,11 +14,11 @@ const app = express();
 
 // 1. Database Connection
 const db = mysql.createConnection({
-    host: '127.0.0.1',
-    user: 'root',
-    password: '', 
-    database: 'lto_system',
-    port: 3306
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 3306
 });
 
 db.connect((err) => {
@@ -219,8 +219,11 @@ app.get('/clients.html', protect, (req, res) => res.sendFile(path.join(__dirname
 app.get('/appointments.html', protect, (req, res) => res.sendFile(path.join(__dirname, "../frontend/appointments.html")));
 app.get('/violations.html', protect, (req, res) => res.sendFile(path.join(__dirname, "../frontend/violations.html")));
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+});
 
 app.put('/api/violations/pay/:id', (req, res) => {
     const violationId = req.params.id;
@@ -543,11 +546,11 @@ app.get('/api/driver/dashboard-data', (req, res) => {
 
 // Gagawa tayo ng hiwalay na connection string para kay dvats_db dahil magkaiba sila ni lto_system
 const dvats_db = mysql.createConnection({
-    host: '127.0.0.1',
-    user: 'root',
-    password: '', 
-    database: 'dvats_db', // Dito nakatabi ang enforcers table ng mobile app
-    port: 3306
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME_MOBILE, // Iba ang db name nito
+    port: process.env.DB_PORT || 3306
 });
 
 dvats_db.connect((err) => {

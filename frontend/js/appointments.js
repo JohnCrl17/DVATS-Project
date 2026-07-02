@@ -306,7 +306,7 @@ const SMS = (() => {
 
   // Gamitin ang existing send_sms.php — API key naka-store na doon
   const send = async (number, message) => {
-    const res = await fetch('https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/send_sms.php', {
+    const res = await fetch('https://dvats-api-php.onrender.com/send_sms.php', {
       method:  'POST',
       headers: {
         'Content-Type': 'application/json',
