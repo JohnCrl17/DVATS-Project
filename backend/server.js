@@ -561,10 +561,10 @@ app.get('/api/driver/dashboard-data', (req, res) => {
 // Gagawa tayo ng hiwalay na connection string para kay dvats_db dahil magkaiba sila ni lto_system
 // ✅ DITO YUNG FIX: Dynamic connection based on environment
 const dvats_db = mysql.createConnection({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME_MOBILE || 'dvats_db', // Separate database name
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME_MOBILE || 'dvats_db',
     port: process.env.DB_PORT || 3306
 });
 
