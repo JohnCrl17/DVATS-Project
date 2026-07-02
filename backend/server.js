@@ -56,7 +56,7 @@ app.use('/api/web-enforcers', enforcerRoutes);
 app.use('/api/web-dashboard', dashboardRoutes);
 app.use('/api/web-clients', clientRoutes);
 app.use('/api/web-violations', violationRoutes);
-app.use('/api/web-ordinances', ordinanceRoutes);
+app.use('/api/web-ordinance', ordinanceRoutes);
 app.use('/api/web-register', registerRoutes);
 
 

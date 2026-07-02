@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const path = require('path');   // ✅ DAGDAG
+const fs = require('fs');
 
 // 1. Get All Violations
 router.get('/all', (req, res) => {
@@ -48,6 +50,25 @@ router.post('/pay', async (req, res) => {
         res.json({ status: "success" });
     } catch (err) {
         res.json({ status: "error", message: err.message });
+    }
+});
+
+router.get('/serve-image', (req, res) => {
+    const imagePath = req.query.path;
+    
+    if (!imagePath) {
+        return res.status(400).send('No path provided');
+    }
+
+    // Construct full path (adjust mo kung iba yung upload folder mo)
+    const fullPath = path.join(__dirname, '..', 'uploads', imagePath.replace(/\\/g, '/'));
+    
+    // Check if file exists
+    if (fs.existsSync(fullPath)) {
+        res.sendFile(fullPath);
+    } else {
+        console.error('Image not found:', fullPath);
+        res.status(404).send('Image not found');
     }
 });
 
