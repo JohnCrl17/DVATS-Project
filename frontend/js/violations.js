@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════════
-const API_BASE_URL = "https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api";
+const API_BASE_URL = "https://dvats-project.onrender.com/api";
 
 function getImageUrl(originalUrl) {
     if (!originalUrl || originalUrl === '') return '';
@@ -11,7 +11,7 @@ function getImageUrl(originalUrl) {
         path = parts.length > 1 ? parts[1] : path;
     }
     path = path.replace(/^\//, '');
-    return `${API_BASE_URL}/serve_image.php?path=${encodeURIComponent(path)}`;
+    return `${API_BASE_URL}/web-violations/serve-image?path=${encodeURIComponent(path)}`;
 }
 
 async function fetchImageAsBlob(url) {
@@ -72,8 +72,8 @@ async function loadViolations() {
     if (!tbody) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/get_violations.php`, {
-            headers: { 'ngrok-skip-browser-warning': 'true' }
+        const response = await fetch(`${API_BASE_URL}/web-violations/list`, {
+            headers: { 'Content-Type': 'application/json' }
         });
         const data = await response.json();
 
@@ -92,14 +92,12 @@ async function loadViolations() {
                         </div>
                     </td>
                 </tr>`;
-            updateDashboardStats([]);
+            if (typeof updateDashboardStats === 'function') updateDashboardStats([]);
             return;
         }
 
         for (const v of violationList) {
-            // ✅ FIX — explicitly i-parse as integer para hindi maging null
             const violationId = parseInt(v.id, 10) || null;
-
             const isPaid = v.status?.toUpperCase() === 'PAID';
             const statusIcon = isPaid ? 'check-circle' : 'alert-circle';
             const statusColor = isPaid ? 'text-green-600 bg-green-50' : 'text-amber-600 bg-amber-50';
@@ -114,9 +112,6 @@ async function loadViolations() {
             const hasViolationPhoto = v.violation_photo && v.violation_photo !== '';
             const hasEnforcerProof = v.enforcer_proof && v.enforcer_proof !== '';
 
-            const vImgId = `vimg-${violationId}`;
-            const eImgId = `eimg-${violationId}`;
-
             let evidenceHTML = '<div class="flex items-center gap-2">';
 
             if (hasViolationPhoto) {
@@ -124,14 +119,8 @@ async function loadViolations() {
                     <button class="vphoto-btn w-12 h-12 rounded-xl bg-slate-200 overflow-hidden border-2 border-slate-300 hover:border-red-400 transition-all flex-shrink-0 relative group"
                         data-url="${getImageUrl(v.violation_photo)}"
                         data-title="Violation Evidence"
-                        data-label="Ticket #${escapeHtml(v.ticket_no || String(violationId))}"
-                        title="Click to view violation photo">
-                        <img id="${vImgId}" src="" alt="Evidence"
-                            class="w-full h-full object-cover"
-                            data-ngrok-src="${getImageUrl(v.violation_photo)}">
-                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                            <i class="bi bi-zoom-in text-white opacity-0 group-hover:opacity-100 text-lg transition-all"></i>
-                        </div>
+                        data-label="Ticket #${escapeHtml(v.ticket_no || String(violationId))}">
+                        <img src="${getImageUrl(v.violation_photo)}" class="w-full h-full object-cover">
                     </button>`;
             }
 
@@ -140,20 +129,14 @@ async function loadViolations() {
                     <button class="vphoto-btn w-12 h-12 rounded-xl bg-slate-200 overflow-hidden border-2 border-slate-300 hover:border-blue-400 transition-all flex-shrink-0 relative group"
                         data-url="${getImageUrl(v.enforcer_proof)}"
                         data-title="Enforcer Proof"
-                        data-label="${escapeHtml(v.proof_type || 'Manual')}"
-                        title="Click to view enforcer proof">
-                        <img id="${eImgId}" src="" alt="Proof"
-                            class="w-full h-full object-cover"
-                            data-ngrok-src="${getImageUrl(v.enforcer_proof)}">
-                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                            <i class="bi bi-zoom-in text-white opacity-0 group-hover:opacity-100 text-lg transition-all"></i>
-                        </div>
+                        data-label="${escapeHtml(v.proof_type || 'Manual')}">
+                        <img src="${getImageUrl(v.enforcer_proof)}" class="w-full h-full object-cover">
                     </button>`;
             }
 
             if (!hasViolationPhoto && !hasEnforcerProof) {
                 evidenceHTML += `
-                    <div class="w-12 h-12 rounded-xl bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center" title="No evidence photos">
+                    <div class="w-12 h-12 rounded-xl bg-slate-50 border border-dashed border-slate-200 flex items-center justify-center">
                         <i class="bi bi-camera-off text-slate-300 text-lg"></i>
                     </div>`;
             }
@@ -162,10 +145,9 @@ async function loadViolations() {
 
             const row = document.createElement('tr');
             row.className = 'violation-row hover:bg-slate-50/50 transition-colors border-b border-slate-50';
-            row.setAttribute('data-status', (v.status?.toLowerCase() === 'paid' ? 'paid' : 'pending'));
+            row.setAttribute('data-status', (isPaid ? 'paid' : 'pending'));
             row.setAttribute('data-date', dateForFilter);
 
-            // ✅ FIX — wala nang inline onclick sa settle button, data-id na lang
             row.innerHTML = `
                 <td class="px-8 py-4 font-mono text-[11px] text-slate-400">${escapeHtml(dateIssued)}</td>
                 <td class="px-6 py-4">
@@ -195,37 +177,24 @@ async function loadViolations() {
 
             tbody.appendChild(row);
 
-            // ✅ FIX — addEventListener after append, dito naka-capture yung totoong violationId
             const settleBtn = row.querySelector('.settle-btn');
             if (settleBtn) {
-                settleBtn.addEventListener('click', () => {
-                    console.log("Settling ID:", violationId); // dapat may number dito
-                    settleViolation(violationId);
-                });
+                settleBtn.addEventListener('click', () => settleViolation(violationId));
             }
 
-            // ✅ Event listeners din para sa image preview buttons
             row.querySelectorAll('.vphoto-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    openImagePreview(
-                        btn.getAttribute('data-url'),
-                        btn.getAttribute('data-title'),
-                        btn.getAttribute('data-label')
-                    );
+                    openImagePreview(btn.getAttribute('data-url'), btn.getAttribute('data-title'), btn.getAttribute('data-label'));
                 });
             });
         }
 
-        loadThumbnails();
-        updateDashboardStats(violationList);
-
-        if (typeof lucide !== 'undefined') {
-            setTimeout(() => lucide.createIcons(), 100);
-        }
+        if (typeof updateDashboardStats === 'function') updateDashboardStats(violationList);
+        if (typeof lucide !== 'undefined') setTimeout(() => lucide.createIcons(), 100);
 
     } catch (err) {
         console.error("Table Load Error:", err);
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-red-500"><i class="bi bi-wifi-off"></i> Failed to connect to API. Please check your connection.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-red-500">Failed to connect to API.</td></tr>`;
     }
 }
 
@@ -337,8 +306,8 @@ async function loadClientDropdown() {
     if (!select) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/get_clients.php`, {
-            headers: { 'ngrok-skip-browser-warning': 'true' }
+        const response = await fetch(`${API_BASE_URL}/web-clients/list`, {
+            headers: { 'Content-Type': 'application/json' }
         });
         const clients = await response.json();
 
@@ -370,11 +339,10 @@ async function saveViolation() {
     btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Processing...`;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/add_violation.php`, {
+        const response = await fetch(`${API_BASE_URL}/web-violations/add`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'ngrok-skip-browser-warning': 'true'
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 client_id: clientId,
@@ -426,18 +394,18 @@ function closeSettleModal() {
 async function confirmSettle() {
     if (!currentSettleId) return;
 
-    const idToSettle = currentSettleId; // ✅ i-save MUNA
-    closeSettleModal();                 // ← ito ang nag-rereset ng currentSettleId = null
+    const idToSettle = currentSettleId;
+    closeSettleModal();
 
     try {
-        const response = await fetch(`${API_BASE_URL}/settle_violation.php`, {
+        const response = await fetch(`${API_BASE_URL}/web-violations/settle`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'ngrok-skip-browser-warning': 'true'
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id: idToSettle }) // ✅ hindi na currentSettleId
+            body: JSON.stringify({ id: idToSettle })
         });
+        
         const result = await response.json();
         if (result.status === 'success') {
             showViolationToast("✅ Violation settled successfully!");

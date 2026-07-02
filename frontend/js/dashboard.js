@@ -1,8 +1,13 @@
 // ======================
 // 🌐 GLOBAL CONFIG
 // ======================
-const API_BASE_URL = 'https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api';
-const CONFIG = { headers: { 'ngrok-skip-browser-warning': 'true' } };
+const API_BASE_URL = 'https://dvats-project.onrender.com/api';
+const CONFIG = { 
+    headers: { 
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true' 
+    } 
+};
 
 // ======================
 // 🚀 INIT
@@ -20,13 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initSearch();
     initLogout();
 
-    // Role restriction
     if (userRole === 'staff') {
         document.querySelectorAll('.admin-only').forEach(el => el.classList.add('hidden'));
-
         const brandName = document.querySelector('.brand-name');
         if (brandName) brandName.innerText = "DASMA STAFF";
-
         const navContainer = document.getElementById('navContainer');
         if (navContainer) navContainer.classList.replace('space-y-2', 'space-y-4');
     }
@@ -41,17 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
 async function safeFetch(url) {
     try {
         const response = await fetch(url, CONFIG);
-
         if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-
-        const text = await response.text();
-
-        console.log("📡 RAW RESPONSE from", url, "=>", text);
-
-        if (!text) throw new Error("Empty response from server");
-
-        return JSON.parse(text);
-
+        const data = await response.json();
+        return data;
     } catch (error) {
         console.error("❌ Fetch failed:", error);
         throw error;
@@ -63,32 +57,17 @@ async function safeFetch(url) {
 // ======================
 async function loadDashboardStats() {
     try {
-        const stats = await safeFetch(`${API_BASE_URL}/summary.php`);
+        const stats = await safeFetch(`${API_BASE_URL}/web-dashboard/summary`);
 
-        document.getElementById('clientsCount') &&
-            (document.getElementById('clientsCount').innerText = stats.totalClients || 0);
-
-        document.getElementById('violationsCount') &&
-            (document.getElementById('violationsCount').innerText = stats.totalViolations || 0);
-
-        document.getElementById('appointmentsCount') &&
-            (document.getElementById('appointmentsCount').innerText = stats.totalAppointments || 0);
-
-        if (document.getElementById('enforcersCount')) {
-            document.getElementById('enforcersCount').innerText = stats.totalEnforcers || 0;
-        }
+        document.getElementById('clientsCount') && (document.getElementById('clientsCount').innerText = stats.totalClients || 0);
+        document.getElementById('violationsCount') && (document.getElementById('violationsCount').innerText = stats.totalViolations || 0);
+        document.getElementById('appointmentsCount') && (document.getElementById('appointmentsCount').innerText = stats.totalAppointments || 0);
+        document.getElementById('enforcersCount') && (document.getElementById('enforcersCount').innerText = stats.totalEnforcers || 0);
 
     } catch (err) {
         console.warn("⚠️ Using fallback stats:", err);
-
-        document.getElementById('clientsCount') &&
-            (document.getElementById('clientsCount').innerText = "0");
-
-        document.getElementById('violationsCount') &&
-            (document.getElementById('violationsCount').innerText = "0");
-
-        document.getElementById('appointmentsCount') &&
-            (document.getElementById('appointmentsCount').innerText = "0");
+        const ids = ['clientsCount', 'violationsCount', 'appointmentsCount', 'enforcersCount'];
+        ids.forEach(id => document.getElementById(id) && (document.getElementById(id).innerText = "0"));
     }
 }
 
@@ -100,68 +79,29 @@ async function loadRecentActivity() {
     if (!list) return;
 
     try {
-        const activities = await safeFetch(`${API_BASE_URL}/recent-activity.php`);
+        const activities = await safeFetch(`${API_BASE_URL}/web-dashboard/recent-activity`);
 
         if (!Array.isArray(activities) || activities.length === 0) {
-            list.innerHTML = `
-                <tr>
-                    <td colspan="4" class="text-center py-10 opacity-50 italic">
-                        No recent activity found.
-                    </td>
-                </tr>`;
+            list.innerHTML = `<tr><td colspan="4" class="text-center py-10 opacity-50 italic">No recent activity found.</td></tr>`;
             return;
         }
 
         list.innerHTML = activities.map(act => {
-            const badgeColor =
-                act.type === 'Violation' ? "bg-red-500" :
-                act.type === 'Appointment' ? "bg-amber-500" :
-                "bg-blue-500";
-
-            const statusColor =
-                (act.status?.toLowerCase() === 'paid' || act.status?.toLowerCase() === 'verified')
-                    ? "text-emerald-600"
-                    : "text-amber-600";
-
-            const formattedDate = act.activity_date
-                ? new Date(act.activity_date).toLocaleString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                })
-                : 'N/A';
+            const badgeColor = act.type === 'Violation' ? "bg-red-500" : act.type === 'Appointment' ? "bg-amber-500" : "bg-blue-500";
+            const statusColor = (act.status?.toLowerCase() === 'paid' || act.status?.toLowerCase() === 'verified') ? "text-emerald-600" : "text-amber-600";
+            const formattedDate = act.activity_date ? new Date(act.activity_date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A';
 
             return `
                 <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-10 py-5">
-                        <span class="px-3 py-1 rounded-lg text-[10px] text-white uppercase font-bold ${badgeColor}">
-                            ${act.type}
-                        </span>
-                    </td>
-                    <td class="px-10 py-5 text-slate-700 font-bold">
-                        ${act.description}
-                    </td>
-                    <td class="px-10 py-5 text-slate-400 font-medium italic">
-                        ${formattedDate}
-                    </td>
-                    <td class="px-10 py-5 text-right">
-                        <span class="${statusColor} uppercase tracking-tighter italic text-xs font-black">
-                            ${act.status || 'Pending'}
-                        </span>
-                    </td>
+                    <td class="px-10 py-5"><span class="px-3 py-1 rounded-lg text-[10px] text-white uppercase font-bold ${badgeColor}">${act.type}</span></td>
+                    <td class="px-10 py-5 text-slate-700 font-bold">${act.description}</td>
+                    <td class="px-10 py-5 text-slate-400 font-medium italic">${formattedDate}</td>
+                    <td class="px-10 py-5 text-right"><span class="${statusColor} uppercase tracking-tighter italic text-xs font-black">${act.status || 'Pending'}</span></td>
                 </tr>`;
         }).join('');
 
     } catch (err) {
-        console.error("❌ Activity failed:", err);
-
-        list.innerHTML = `
-            <tr>
-                <td colspan="4" class="text-center py-10 text-red-400 italic">
-                    Failed to load live data. Check API / database.
-                </td>
-            </tr>`;
+        list.innerHTML = `<tr><td colspan="4" class="text-center py-10 text-red-400 italic">Failed to load live data.</td></tr>`;
     }
 }
 

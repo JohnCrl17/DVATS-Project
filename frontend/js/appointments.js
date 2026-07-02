@@ -306,18 +306,18 @@ const SMS = (() => {
 
   // Gamitin ang existing send_sms.php — API key naka-store na doon
   const send = async (number, message) => {
-    const res = await fetch('https://dvats-api-php.onrender.com/send_sms.php', {
-      method:  'POST',
+    const res = await fetch(`${API_BASE_URL}/web-appointments/send-sms`, {
+      method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ number, message }),
     });
+    
     const data = await res.json();
     if (!data.success) throw new Error(data.error || data.message || 'SMS failed');
     return data;
-  };
+};
 
   // Show SMS preview modal — returns Promise<boolean>
   const preview = (recipientName, phoneNumber, message) => {

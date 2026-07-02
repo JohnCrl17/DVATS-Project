@@ -3,7 +3,7 @@
  * Mirrors clients.js structure
  */
 
-const API_BASE_URL = "https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api";
+const API_BASE_URL = "https://dvats-project.onrender.com/api";
 
 let localEnforcersArray = [];
 let currentFilterStatus = 'all';
@@ -21,15 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
 // ─── FETCH ALL ENFORCERS ──────────────────────────────────────
 async function fetchEnforcers() {
     try {
-        const response = await fetch(`${API_BASE_URL}/get_enforcer.php`, {
-            headers: { 'ngrok-skip-browser-warning': 'true' }
+        const response = await fetch(`${API_BASE_URL}/web-enforcers/list`, {
+            headers: { 'Content-Type': 'application/json' }
         });
 
         if (!response.ok) throw new Error("Network error");
 
         const data = await response.json();
 
-        // Safety check — kung hindi array ang bumalik (baka error object o wrapped response)
         if (!Array.isArray(data)) {
             console.warn("Expected array but got:", data);
             localEnforcersArray = [];
@@ -45,7 +44,7 @@ async function fetchEnforcers() {
         document.getElementById('enforcerTableBody').innerHTML = `
             <tr>
                 <td colspan="6" class="py-10 text-center text-red-400 font-bold">
-                    Failed to load data. Check Ngrok/Laragon.
+                    Failed to load data.
                 </td>
             </tr>`;
     }
@@ -159,36 +158,31 @@ async function viewEnforcer(id) {
     if (!id) return;
 
     try {
-        const response = await fetch(`${API_BASE_URL}/get_enforcer_details.php?id=${id}`, {
-            headers: { 'ngrok-skip-browser-warning': 'true' }
+        const response = await fetch(`${API_BASE_URL}/web-enforcers/details?id=${id}`, {
+            headers: { 'Content-Type': 'application/json' }
         });
 
-        const text = await response.text();
-        if (!text.trim().startsWith('{') && !text.trim().startsWith('[')) {
-            console.error("Non-JSON response:", text);
-            IosAlert.alert('System Error', 'Server returned an invalid response.');
-            return;
-        }
+        if (!response.ok) throw new Error("Failed to fetch enforcer details");
 
-        const e = JSON.parse(text);
+        const e = await response.json();
 
         // ── Populate modal fields
-        document.getElementById('view-name').innerText    = e.full_name     || 'Unknown';
-        document.getElementById('view-badge').innerText   = `Badge: ${e.badge_number || 'N/A'}`;
-        document.getElementById('view-unit').innerText    = e.unit          || 'N/A';
-        document.getElementById('view-email').innerText   = e.email         || 'No Email';
-        document.getElementById('view-phone').innerText   = e.phone_number  || 'No Number';
-        document.getElementById('view-gender').innerText  = e.gender        || 'N/A';
-        document.getElementById('view-dob').innerText     = e.dob           || 'N/A';
-        document.getElementById('view-status').innerText  = (e.status || 'pending').toUpperCase();
-        document.getElementById('view-status').className  = e.status === 'active'
+        document.getElementById('view-name').innerText = e.full_name || 'Unknown';
+        document.getElementById('view-badge').innerText = `Badge: ${e.badge_number || 'N/A'}`;
+        document.getElementById('view-unit').innerText = e.unit || 'N/A';
+        document.getElementById('view-email').innerText = e.email || 'No Email';
+        document.getElementById('view-phone').innerText = e.phone_number || 'No Number';
+        document.getElementById('view-gender').innerText = e.gender || 'N/A';
+        document.getElementById('view-dob').innerText = e.dob || 'N/A';
+        document.getElementById('view-status').innerText = (e.status || 'pending').toUpperCase();
+        document.getElementById('view-status').className = e.status === 'active'
             ? 'px-3 py-1 rounded-full text-[10px] font-black uppercase bg-emerald-100 text-emerald-600'
             : 'px-3 py-1 rounded-full text-[10px] font-black uppercase bg-amber-100 text-amber-600';
 
         // ── Face photo
-        const faceImg  = document.getElementById('view-face');
+        const faceImg = document.getElementById('view-face');
         const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(e.full_name || 'E')}&background=00A36C&color=fff`;
-        faceImg.src    = (e.face_data && e.face_data.length > 100) ? e.face_data : fallback;
+        faceImg.src = (e.face_data && e.face_data.length > 100) ? e.face_data : fallback;
         faceImg.onerror = () => { faceImg.src = fallback; };
 
         // ── QR image
@@ -196,11 +190,11 @@ async function viewEnforcer(id) {
         const btnQR = document.getElementById('btnShowQR');
         if (qrImg && btnQR) {
             if (e.qr_image && e.qr_image.length > 100) {
-                qrImg.src           = e.qr_image;
-                btnQR.style.display = 'flex';   // ← ipakita ang button
+                qrImg.src = e.qr_image;
+                btnQR.style.display = 'flex';
             } else {
-                qrImg.src           = '';
-                btnQR.style.display = 'none';   // ← itago kung walang QR
+                qrImg.src = '';
+                btnQR.style.display = 'none';
             }
         }
 
@@ -208,7 +202,7 @@ async function viewEnforcer(id) {
 
     } catch (err) {
         console.error("View Error:", err);
-        IosAlert.alert('Error', 'Could not load enforcer details.');
+        alert('Could not load enforcer details.');
     }
 }
 
@@ -226,24 +220,31 @@ async function toggleStatus(id, currentStatus) {
     const nextStatus = currentStatus === 'active' ? 'pending' : 'active';
 
     try {
-        const response = await fetch(`${API_BASE_URL}/get_enforcer.php`, {
-            method:  'POST',
+        // Siguraduhin na tama ang endpoint sa backend mo
+        const response = await fetch(`${API_BASE_URL}/web-enforcers/update-status`, {
+            method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'ngrok-skip-browser-warning': 'true'
+                'Content-Type': 'application/json'
             },
-            body: `action=update_status&id=${id}&status=${nextStatus}`
+            // Mas malinis ang JSON kaysa sa manual string concatenation
+            body: JSON.stringify({ 
+                id: id, 
+                status: nextStatus 
+            })
         });
 
         const result = await response.json();
+        
         if (result.success) {
-            fetchEnforcers();
+            // Success! Refresh natin ang table
+            fetchEnforcers(); 
         } else {
-            IosAlert.alert('Error', result.message || 'Status update failed.');
+            // May error na galing sa server
+            alert(result.message || 'Status update failed.');
         }
     } catch (err) {
         console.error("Toggle error:", err);
-        IosAlert.alert('Error', 'Could not update status.');
+        alert('Could not update status. Check server connection.');
     }
 }
 
@@ -260,22 +261,40 @@ function closeDeleteModal() {
 }
 
 async function confirmDelete() {
+    // Siguraduhin na may target ID
     if (!currentDeleteId) return;
+
+    // Isara muna ang modal para hindi ma-click ulit habang nagpa-process
     closeDeleteModal();
+
     try {
-        const response = await fetch(`${API_BASE_URL}/delete_enforcer.php?id=${currentDeleteId}`, {
-            method:  'DELETE',
-            headers: { 'ngrok-skip-browser-warning': 'true' }
+        const response = await fetch(`${API_BASE_URL}/web-enforcers/delete`, {
+            method: 'POST', // Mas safe gamitin ang POST para sa delete operations sa karamihan ng setups
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            // I-pass ang ID sa loob ng body, hindi sa URL
+            body: JSON.stringify({ id: currentDeleteId })
         });
+
         const data = await response.json();
+
         if (data.status === 'success') {
-            IosAlert.toast('Enforcer record deleted.');
+            // Success! Refresh natin ang listahan
+            if (typeof IosAlert !== 'undefined') {
+                IosAlert.toast('Enforcer record deleted.');
+            }
             fetchEnforcers();
         } else {
-            IosAlert.alert('Error', data.message || 'Delete failed.');
+            // Error handling mula sa server
+            alert(data.message || 'Delete failed.');
         }
     } catch (err) {
-        IosAlert.alert('Error', 'Could not connect to server.');
+        console.error("Delete error:", err);
+        alert('Could not connect to server.');
+    } finally {
+        // Reset ng ID para hindi ma-delete ulit nang hindi sinasadya
+        currentDeleteId = null;
     }
 }
 

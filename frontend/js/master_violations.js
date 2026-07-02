@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 // CONFIG
 // ═══════════════════════════════════════════════════════════
-const API_BASE = 'https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api';
+const API_BASE = 'https://dvats-project.onrender.com/api';
 const HEADERS  = {
     'Content-Type': 'application/json',
     'ngrok-skip-browser-warning': 'true',
@@ -78,12 +78,12 @@ function closeDeleteModal() {
 // CRUD OPERATIONS
 // ═══════════════════════════════════════════════════════════
 async function saveViolation() {
-    const editId        = document.getElementById('editId').value;
-    const ordinanceNo   = document.getElementById('ordinanceNo').value.trim();
+    const editId = document.getElementById('editId').value;
+    const ordinanceNo = document.getElementById('ordinanceNo').value.trim();
     const violationName = document.getElementById('violationName').value.trim();
-    const firstOffense  = document.getElementById('firstOffense').value.trim();
+    const firstOffense = document.getElementById('firstOffense').value.trim();
     const secondOffense = document.getElementById('secondOffense').value.trim();
-    const thirdOffense  = document.getElementById('thirdOffense').value.trim();
+    const thirdOffense = document.getElementById('thirdOffense').value.trim();
 
     // Validation
     if (!ordinanceNo || !violationName) {
@@ -97,23 +97,22 @@ async function saveViolation() {
     }
 
     const payload = {
-        ordinance_no:   ordinanceNo,
+        ordinance_no: ordinanceNo,
         violation_name: violationName,
-        first_offense:  parseFloat(firstOffense) || 0,
+        first_offense: parseFloat(firstOffense) || 0,
         second_offense: parseFloat(secondOffense) || 0,
-        third_offense:  parseFloat(thirdOffense) || 0
+        third_offense: parseFloat(thirdOffense) || 0
     };
 
     const isEdit = editId !== '';
     if (isEdit) payload.id = editId;
 
     try {
-        const endpoint = isEdit ? `${API_BASE}/master_violations_api.php?action=update` 
-                                : `${API_BASE}/master_violations_api.php?action=create`;
+        const endpoint = isEdit ? `${API_BASE_URL}/web-ordinance/update` : `${API_BASE_URL}/web-ordinance/create`;
         
         const response = await fetch(endpoint, {
             method: 'POST',
-            headers: HEADERS,
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
@@ -136,9 +135,9 @@ async function confirmDelete() {
     if (!deleteTargetId) return;
 
     try {
-        const response = await fetch(`${API_BASE}/master_violations_api.php?action=delete`, {
+        const response = await fetch(`${API_BASE_URL}/web-ordinance/delete`, {
             method: 'POST',
-            headers: HEADERS,
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: deleteTargetId })
         });
 
@@ -162,8 +161,9 @@ async function confirmDelete() {
 // ═══════════════════════════════════════════════════════════
 async function loadViolations() {
     try {
-        const response = await fetch(`${API_BASE}/master_violations_api.php?action=read`, {
-            headers: HEADERS
+        const response = await fetch(`${API_BASE_URL}/web-ordinance/list`, {
+            method: 'GET',
+            headers: { 'Content-Type': 'application/json' }
         });
         const result = await response.json();
 

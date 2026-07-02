@@ -4,7 +4,8 @@
  */
 
 // 1. Siguraduhin na ito ang active Ngrok URL mo
-const API_BASE_URL = "https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api";
+// Gawin mo itong ganito:
+const API_BASE_URL = 'https://dvats-project.onrender.com/api';
 
 document.addEventListener('DOMContentLoaded', () => {
     loadClients();
@@ -17,8 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadClients() {
     try {
         // Fetch clients list
-        const response = await fetch(`${API_BASE_URL}/get_clients.php`, {
-            headers: { 'ngrok-skip-browser-warning': 'true' }
+        const response = await fetch(`${API_BASE_URL}/web-clients/list`, {
+            headers: { 'Content-Type': 'application/json' }
         });
         
         if (!response.ok) throw new Error("Network response was not ok");
@@ -66,7 +67,7 @@ async function loadClients() {
     } catch (error) {
         console.error("Load Error:", error);
         const tableBody = document.getElementById('clientsTableBody');
-        if(tableBody) tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-20 text-red-400 font-bold">Error loading data. Check Ngrok/Laragon.</td></tr>';
+        if(tableBody) tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-20 text-red-400 font-bold">Error loading data.</td></tr>';
     }
 }
 
@@ -75,34 +76,22 @@ async function viewClient(id) {
     if (!id || id === 'undefined') return;
 
     try {
-        const config = { 
-            headers: { 'ngrok-skip-browser-warning': 'true' } 
-        };
-
-        // I-fetch ang data
         const [clientRes, historyRes] = await Promise.all([
-            fetch(`${API_BASE_URL}/get_client_details.php?id=${id}`, config),
-            fetch(`${API_BASE_URL}/get_client_history.php?id=${id}`, config).catch(() => null)
+            fetch(`${API_BASE_URL}/web-clients/details?id=${id}`, {
+                headers: { 'Content-Type': 'application/json' }
+            }),
+            fetch(`${API_BASE_URL}/web-clients/history?id=${id}`, {
+                headers: { 'Content-Type': 'application/json' }
+            }).catch(() => null)
         ]);
 
-        const clientText = await clientRes.text();
-        
-        // --- THE FIX: Check if the response is actually JSON ---
-        if (!clientText.trim().startsWith('{') && !clientText.trim().startsWith('[')) {
-            console.error("Server returned non-JSON response:", clientText);
-            alert("System Error: The server returned an invalid response. Check PHP logs.");
-            return;
-        }
+        if (!clientRes.ok) throw new Error("Failed to fetch client details");
 
-        const client = JSON.parse(clientText);
+        const client = await clientRes.json();
         
-        // Handle History Safely
         let history = [];
-        if (historyRes) {
-            const historyText = await historyRes.text();
-            if (historyText.trim().startsWith('[')) {
-                history = JSON.parse(historyText);
-            }
+        if (historyRes && historyRes.ok) {
+            history = await historyRes.json();
         }
 
         // --- POPULATE MODAL ---
@@ -118,15 +107,13 @@ async function viewClient(id) {
         document.getElementById('view-phone').innerText = client.phone_number || 'No Number';
         document.getElementById('view-reg-date').innerText = client.reg_date || 'N/A';
         
-        // Image Handling (face_date vs face_data check)
         const faceImg = document.getElementById('view-face');
-        const faceData = client.face_data || client.face_date; // Handle both column names
+        const faceData = client.face_data || client.face_date;
         const fallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(client.fullname)}&background=107c10&color=fff`;
         
         faceImg.src = (faceData && faceData.length > 100) ? faceData : fallback;
         faceImg.onerror = () => { faceImg.src = fallback; };
 
-        // History Mapping
         const historyList = document.getElementById('historyList');
         if (!history || history.length === 0) {
             historyList.innerHTML = `<p class="text-[11px] text-slate-400 italic">No violation records found.</p>`;
@@ -178,14 +165,14 @@ async function confirmSendSMS() {
   if (!msg) return;
   closeSMSModal();
   try {
-    const res = await fetch(`${API_BASE_URL}/send_sms.php`, {
+    const res = await fetch(`${API_BASE_URL}/web-clients/send-sms`, {
       method: 'POST',
       headers: { 
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ number: currentSMSPhone, message: msg })
     });
+    
     const result = await res.json();
     if (result.success) {
       showToastMsg("✅ SMS Sent Successfully!");
@@ -193,7 +180,7 @@ async function confirmSendSMS() {
       showToastMsg("❌ Failed to send SMS.", 'error');
     }
   } catch (e) {
-    showToastMsg("❌ Server Error. Ensure Ngrok is active.", 'error');
+    showToastMsg("❌ Server Error.", 'error');
   }
 }
 
@@ -210,23 +197,27 @@ function closeDeleteModal() {
 }
 
 async function confirmDelete() {
-  if (!currentDeleteId) return;
-  closeDeleteModal();
-  try {
-    const response = await fetch(`${API_BASE_URL}/delete_client.php?id=${currentDeleteId}`, {
-      method: 'DELETE',
-      headers: { 'ngrok-skip-browser-warning': 'true' }
-    });
-    const data = await response.json();
-    if (data.status === 'success') {
-      showToastMsg("✅ " + data.message);
-      loadClients();
-    } else {
-      showToastMsg("⚠️ " + data.message, 'error');
+    if (!currentDeleteId) return;
+    closeDeleteModal();
+    try {
+        const response = await fetch(`${API_BASE_URL}/web-clients/delete`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json' 
+            },
+            body: JSON.stringify({ id: currentDeleteId })
+        });
+        
+        const data = await response.json();
+        if (data.status === 'success') {
+            showToastMsg("✅ Client Deleted!");
+            loadClients();
+        } else {
+            showToastMsg("⚠️ " + (data.message || "Failed to delete"), 'error');
+        }
+    } catch (error) {
+        showToastMsg("❌ Server Error.", 'error');
     }
-  } catch (error) {
-    showToastMsg("❌ Error connecting to server.", 'error');
-  }
 }
 
 // ✅ Toast — para sa success/error messages

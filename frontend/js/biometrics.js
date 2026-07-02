@@ -464,7 +464,7 @@ async function submitRegistration() {
         formData.append('qr_image', qrBase64); // NGAYON, MAY LAMAN NA ITO!
 
         try {
-            const API_URL = "https://unadroitly-nonthinking-lora.ngrok-free.dev/dvats_api/insert_enforcer.php";
+            const API_URL = "https://dvats-project.onrender.com/api/enforcers/insert_enforcer";
             const response = await fetch(API_URL, {
                 method: 'POST',
                 body: formData,
