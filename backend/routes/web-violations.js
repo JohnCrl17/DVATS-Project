@@ -53,8 +53,8 @@ router.post('/pay', async (req, res) => {
     }
 });
 
-// ✅ FIXED: Serve Image Route (converted from PHP logic)
-router.get('/serve-image', (req, res) => {
+// ✅ FIXED: Proxy images from PHP API on Render
+router.get('/serve-image', async (req, res) => {
     const imagePath = req.query.path;
 
     if (!imagePath) {
@@ -62,66 +62,38 @@ router.get('/serve-image', (req, res) => {
         return res.send('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#f1f5f9" width="200" height="200"/><text x="100" y="105" text-anchor="middle" fill="#94a3b8" font-size="16">No image</text></svg>');
     }
 
-    // Decode URL-encoded path
-    const decodedPath = decodeURIComponent(imagePath);
-    
-    // Extract filename
-    const filename = path.basename(decodedPath);
-    
-    // Determine which folder based on path
-    let filePath;
-    const uploadsDir = path.join(__dirname, '..', 'uploads');
-    
-    if (decodedPath.includes('violation')) {
-        filePath = path.join(uploadsDir, 'violation', filename);
-    } else if (decodedPath.includes('proof')) {
-        filePath = path.join(uploadsDir, 'proof', filename);
-    } else {
-        // Try common folders first
-        if (fs.existsSync(path.join(uploadsDir, 'violation', filename))) {
-            filePath = path.join(uploadsDir, 'violation', filename);
-        } else if (fs.existsSync(path.join(uploadsDir, 'proof', filename))) {
-            filePath = path.join(uploadsDir, 'proof', filename);
-        } else {
-            filePath = path.join(uploadsDir, filename);
-        }
-    }
-
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
-        console.error('❌ Image not found:', filePath);
-        res.setHeader('Content-Type', 'image/svg+xml');
-        res.setHeader('Cache-Control', 'no-cache');
-        return res.send(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#fef2f2" width="200" height="200"/><text x="100" y="95" text-anchor="middle" fill="#ef4444" font-size="14">File not found</text><text x="100" y="115" text-anchor="middle" fill="#94a3b8" font-size="10">${filename}</text></svg>`);
-    }
-
-    // Determine MIME type
-    const ext = path.extname(filePath).toLowerCase();
-    const mimeTypes = {
-        '.jpg': 'image/jpeg',
-        '.jpeg': 'image/jpeg',
-        '.png': 'image/png',
-        '.gif': 'image/gif',
-        '.webp': 'image/webp',
-        '.bmp': 'image/bmp'
-    };
-    const mimeType = mimeTypes[ext] || 'application/octet-stream';
-
-    // Set headers
-    res.setHeader('Content-Type', mimeType);
-    res.setHeader('Cache-Control', 'public, max-age=3600');
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-
-    // Send file
-    res.sendFile(filePath, (err) => {
-        if (err) {
-            console.error('❌ Error sending file:', err);
-            if (!res.headersSent) {
-                res.status(500).send('Error serving image');
+    try {
+        // ✅ Dito yung PHP API URL mo
+        const phpApiUrl = 'https://dvats-api-php.onrender.com';
+        const imageUrl = `${phpApiUrl}/serve-image.php?path=${encodeURIComponent(imagePath)}`;
+        
+        console.log('📸 Proxying from:', imageUrl);
+        
+        const https = require('https');
+        const http = require('http');
+        const client = imageUrl.startsWith('https') ? https : http;
+        
+        client.get(imageUrl, (proxyRes) => {
+            if (proxyRes.statusCode === 404) {
+                res.setHeader('Content-Type', 'image/svg+xml');
+                return res.send('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#fef2f2" width="200" height="200"/><text x="100" y="95" text-anchor="middle" fill="#ef4444" font-size="14">Image not found</text></svg>');
             }
-        }
-    });
+            
+            res.setHeader('Content-Type', proxyRes.headers['content-type'] || 'image/jpeg');
+            res.setHeader('Cache-Control', 'public, max-age=3600');
+            res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+            
+            proxyRes.pipe(res);
+        }).on('error', (err) => {
+            console.error('❌ Proxy error:', err.message);
+            res.setHeader('Content-Type', 'image/svg+xml');
+            res.send('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect fill="#fef2f2" width="200" height="200"/><text x="100" y="95" text-anchor="middle" fill="#ef4444" font-size="14">Service unavailable</text></svg>');
+        });
+        
+    } catch (err) {
+        console.error('❌ Serve error:', err.message);
+        res.status(500).send('Error serving image');
+    }
 });
 
 module.exports = router;
