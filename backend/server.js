@@ -241,33 +241,10 @@ app.listen(PORT, '0.0.0.0', () => {
 
 app.put('/api/violations/pay/:id', (req, res) => {
     const violationId = req.params.id;
-    
-    // Update lto_system.violations
-    const sql = "UPDATE violations SET status = 'Paid', updated_at = NOW() WHERE id = ?";
+    const sql = "UPDATE violations SET status = 'Paid' WHERE violation_id = ?";
     db.query(sql, [violationId], (err, result) => {
-        if (err) {
-            console.error("❌ Update Error:", err.message);
-            return res.status(500).json({ success: false, message: "Database Error" });
-        }
-        
-        // Success muna sa main DB
+        if (err) return res.status(500).json({ success: false, message: "Database Error" });
         res.json({ success: true, message: "Fine marked as paid!" });
-        
-        // Try to sync dvats_db.apprehensions (optional, async)
-        const getTicketSql = "SELECT ticket_no FROM violations WHERE id = ?";
-        db.query(getTicketSql, [violationId], (err2, ticketResult) => {
-            if (!err2 && ticketResult.length > 0) {
-                const ticket_no = ticketResult[0].ticket_no;
-                dvats_db.query(
-                    "UPDATE apprehensions SET status = 'PAID' WHERE ticket_no = ?",
-                    [ticket_no],
-                    (err3) => {
-                        if (err3) console.warn("⚠️ dvats_db sync failed:", err3.message);
-                        else console.log("✅ Synced to dvats_db:", ticket_no);
-                    }
-                );
-            }
-        });
     });
 });
 

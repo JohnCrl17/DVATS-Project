@@ -401,16 +401,15 @@ async function confirmSettle() {
     closeSettleModal();
 
     try {
-        // ✅ FIXED: /web-violations/pay
-        const response = await fetch(`${API_BASE_URL}/web-violations/pay`, {
-            method: 'POST',
+        // ✅ FIXED: PUT method with ID in URL
+        const response = await fetch(`${API_BASE_URL}/web-violations/pay/${idToSettle}`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ id: idToSettle })
+            }
         });
         const result = await response.json();
-        if (result.status === 'success') {
+        if (result.success) {
             showViolationToast("✅ Violation settled successfully!");
             loadViolations();
         } else {
