@@ -241,10 +241,37 @@ app.listen(PORT, '0.0.0.0', () => {
 
 app.put('/api/violations/pay/:id', (req, res) => {
     const violationId = req.params.id;
-    const sql = "UPDATE violations SET status = 'Paid' WHERE violation_id = ?";
-    db.query(sql, [violationId], (err, result) => {
-        if (err) return res.status(500).json({ success: false, message: "Database Error" });
+    
+    // Step 1: Update lto_system.violations (MAIN - dapat ito lang ang required)
+    const sql1 = "UPDATE violations SET status = 'Paid', updated_at = NOW() WHERE id = ?";
+    db.query(sql1, [violationId], (err1, result1) => {
+        if (err1) {
+            console.error("❌ Update Error:", err1.message);
+            return res.status(500).json({ success: false, message: "Database Error" });
+        }
+        
+        if (result1.affectedRows === 0) {
+            return res.status(404).json({ success: false, message: "Violation not found" });
+        }
+        
+        // ✅ Main DB updated successfully! Return success agad.
         res.json({ success: true, message: "Fine marked as paid!" });
+        
+        // Step 2: Try to sync with dvats_db (OPTIONAL - hindi dapat makaapekto sa main response)
+        const getTicketSql = "SELECT ticket_no FROM violations WHERE id = ?";
+        db.query(getTicketSql, [violationId], (err2, ticketResult) => {
+            if (!err2 && ticketResult.length > 0) {
+                const ticket_no = ticketResult[0].ticket_no;
+                const sql2 = "UPDATE apprehensions SET status = 'PAID' WHERE ticket_no = ?";
+                dvats_db.query(sql2, [ticket_no], (err3) => {
+                    if (err3) {
+                        console.warn("⚠️ Mobile DB sync failed (non-critical):", err3.message);
+                    } else {
+                        console.log("✅ Kambal Sync: Ticket " + ticket_no + " PAID in both systems");
+                    }
+                });
+            }
+        });
     });
 });
 
