@@ -435,23 +435,24 @@ export default function ApprehensionScreen() {
       if (biometricAuth.success) setCurrentStep(6);
       else IosAlert.alert('Auth Failed', 'Biometric authentication required.');
     } else if (currentStep === 6) {
-    if (selectedViolations.length === 0) { IosAlert.alert('Warning', 'Select at least one violation.'); return; }
-    
-    // ✅ Check kung may photos na
-    if (!violationPhotoUrl && violationPhotoUri) {
-        IosAlert.alert('Uploading', 'Please wait for the evidence photo to finish uploading.');
-        return;
-    }
-    if (!enforcerProofUrl && enforcerProofUri) {
-        IosAlert.alert('Uploading', 'Please wait for the identity proof to finish uploading.');
-        return;
-    }
-    
-    IosAlert.alert('Confirm Ticket', `Issue ticket to ${driverName}?`, [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Confirm', onPress: () => submitApprehension() }
-    ]);
-}
+      if (selectedViolations.length === 0) { IosAlert.alert('Warning', 'Select at least one violation.'); return; }
+      
+      // ❌ TANGGALIN 'TONG DALAWA:
+      // if (!violationPhotoUrl && violationPhotoUri) {
+      //     IosAlert.alert('Uploading', 'Please wait for the evidence photo to finish uploading.');
+      //     return;
+      // }
+      // if (!enforcerProofUrl && enforcerProofUri) {
+      //     IosAlert.alert('Uploading', 'Please wait for the identity proof to finish uploading.');
+      //     return;
+      // }
+      
+      // ✅ Derecho na:
+      IosAlert.alert('Confirm Ticket', `Issue ticket to ${driverName}?`, [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Confirm', onPress: () => submitApprehension() }
+      ]);
+  }
   };
 
 const submitApprehension = async () => {
